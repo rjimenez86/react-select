@@ -14,7 +14,9 @@
   },
   "dependencies": {
     "classnames": "^2.2.4",
+    "lodash": "^4.17.4",
     "prop-types": "^15.5.8",
+    "react-event-listener": "^0.5.1",
     "react-input-autosize": "^2.0.1"
   },
   "devDependencies": {
