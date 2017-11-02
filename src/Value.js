@@ -82,16 +82,17 @@ class Value extends React.Component {
 
 	render () {
 		return (
-			<div className={classNames('Select-value', this.props.value.className)}
-				style={this.props.value.style}
+			<div
+				className={classNames('Select-value', this.props.value.className)}
+				style={{...this.props.style}}
 				title={this.props.value.title}
-				>
+			>
 				{this.renderRemoveIcon()}
 				{this.renderLabel()}
 			</div>
 		);
 	}
-};
+}
 
 
 Value.propTypes = {

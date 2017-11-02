@@ -86,8 +86,7 @@
     "lint": "eslint .",
     "publish:examples": "NODE_ENV=production nps publish",
     "start": "webpack-dev-server --progress",
-    "test": "NODE_ENV=test mocha --compilers js:babel-core/register",
-    "precommit": "lint-staged && yarn run test"
+    "test": "NODE_ENV=test mocha --compilers js:babel-core/register"
   },
   "files": [
     "dist",
@@ -102,8 +101,5 @@
     "react-component",
     "select",
     "ui"
-  ],
-  "lint-staged": {
-    "*.js": "eslint"
-  }
+  ]
 }

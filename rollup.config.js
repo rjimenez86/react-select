@@ -10,6 +10,8 @@ const globals = {
 	'prop-types': 'PropTypes',
 	'react-dom': 'ReactDOM',
 	'react-input-autosize': 'AutosizeInput',
+	'lodash': '_',
+	'react-event-listener': 'EventListener',
 	react: 'React',
 };
 const external = Object.keys(globals);

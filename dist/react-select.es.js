@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
+import PropTypes$1 from 'prop-types';
+import ReactDOM, { unmountComponentAtNode, unstable_renderSubtreeIntoContainer } from 'react-dom';
 import AutosizeInput from 'react-input-autosize';
 import classNames from 'classnames';
+import EventListener from 'react-event-listener';
+import _ from 'lodash';
 
 function arrowRenderer(_ref) {
 	var onMouseDown = _ref.onMouseDown;
@@ -14,7 +16,7 @@ function arrowRenderer(_ref) {
 }
 
 arrowRenderer.propTypes = {
-	onMouseDown: PropTypes.func
+	onMouseDown: PropTypes$1.func
 };
 
 var map = [{ 'base': 'A', 'letters': /[\u0041\u24B6\uFF21\u00C0\u00C1\u00C2\u1EA6\u1EA4\u1EAA\u1EA8\u00C3\u0100\u0102\u1EB0\u1EAE\u1EB4\u1EB2\u0226\u01E0\u00C4\u01DE\u1EA2\u00C5\u01FA\u01CD\u0200\u0202\u1EA0\u1EAC\u1EB6\u1E00\u0104\u023A\u2C6F]/g }, { 'base': 'AA', 'letters': /[\uA732]/g }, { 'base': 'AE', 'letters': /[\u00C6\u01FC\u01E2]/g }, { 'base': 'AO', 'letters': /[\uA734]/g }, { 'base': 'AU', 'letters': /[\uA736]/g }, { 'base': 'AV', 'letters': /[\uA738\uA73A]/g }, { 'base': 'AY', 'letters': /[\uA73C]/g }, { 'base': 'B', 'letters': /[\u0042\u24B7\uFF22\u1E02\u1E04\u1E06\u0243\u0182\u0181]/g }, { 'base': 'C', 'letters': /[\u0043\u24B8\uFF23\u0106\u0108\u010A\u010C\u00C7\u1E08\u0187\u023B\uA73E]/g }, { 'base': 'D', 'letters': /[\u0044\u24B9\uFF24\u1E0A\u010E\u1E0C\u1E10\u1E12\u1E0E\u0110\u018B\u018A\u0189\uA779]/g }, { 'base': 'DZ', 'letters': /[\u01F1\u01C4]/g }, { 'base': 'Dz', 'letters': /[\u01F2\u01C5]/g }, { 'base': 'E', 'letters': /[\u0045\u24BA\uFF25\u00C8\u00C9\u00CA\u1EC0\u1EBE\u1EC4\u1EC2\u1EBC\u0112\u1E14\u1E16\u0114\u0116\u00CB\u1EBA\u011A\u0204\u0206\u1EB8\u1EC6\u0228\u1E1C\u0118\u1E18\u1E1A\u0190\u018E]/g }, { 'base': 'F', 'letters': /[\u0046\u24BB\uFF26\u1E1E\u0191\uA77B]/g }, { 'base': 'G', 'letters': /[\u0047\u24BC\uFF27\u01F4\u011C\u1E20\u011E\u0120\u01E6\u0122\u01E4\u0193\uA7A0\uA77D\uA77E]/g }, { 'base': 'H', 'letters': /[\u0048\u24BD\uFF28\u0124\u1E22\u1E26\u021E\u1E24\u1E28\u1E2A\u0126\u2C67\u2C75\uA78D]/g }, { 'base': 'I', 'letters': /[\u0049\u24BE\uFF29\u00CC\u00CD\u00CE\u0128\u012A\u012C\u0130\u00CF\u1E2E\u1EC8\u01CF\u0208\u020A\u1ECA\u012E\u1E2C\u0197]/g }, { 'base': 'J', 'letters': /[\u004A\u24BF\uFF2A\u0134\u0248]/g }, { 'base': 'K', 'letters': /[\u004B\u24C0\uFF2B\u1E30\u01E8\u1E32\u0136\u1E34\u0198\u2C69\uA740\uA742\uA744\uA7A2]/g }, { 'base': 'L', 'letters': /[\u004C\u24C1\uFF2C\u013F\u0139\u013D\u1E36\u1E38\u013B\u1E3C\u1E3A\u0141\u023D\u2C62\u2C60\uA748\uA746\uA780]/g }, { 'base': 'LJ', 'letters': /[\u01C7]/g }, { 'base': 'Lj', 'letters': /[\u01C8]/g }, { 'base': 'M', 'letters': /[\u004D\u24C2\uFF2D\u1E3E\u1E40\u1E42\u2C6E\u019C]/g }, { 'base': 'N', 'letters': /[\u004E\u24C3\uFF2E\u01F8\u0143\u00D1\u1E44\u0147\u1E46\u0145\u1E4A\u1E48\u0220\u019D\uA790\uA7A4]/g }, { 'base': 'NJ', 'letters': /[\u01CA]/g }, { 'base': 'Nj', 'letters': /[\u01CB]/g }, { 'base': 'O', 'letters': /[\u004F\u24C4\uFF2F\u00D2\u00D3\u00D4\u1ED2\u1ED0\u1ED6\u1ED4\u00D5\u1E4C\u022C\u1E4E\u014C\u1E50\u1E52\u014E\u022E\u0230\u00D6\u022A\u1ECE\u0150\u01D1\u020C\u020E\u01A0\u1EDC\u1EDA\u1EE0\u1EDE\u1EE2\u1ECC\u1ED8\u01EA\u01EC\u00D8\u01FE\u0186\u019F\uA74A\uA74C]/g }, { 'base': 'OI', 'letters': /[\u01A2]/g }, { 'base': 'OO', 'letters': /[\uA74E]/g }, { 'base': 'OU', 'letters': /[\u0222]/g }, { 'base': 'P', 'letters': /[\u0050\u24C5\uFF30\u1E54\u1E56\u01A4\u2C63\uA750\uA752\uA754]/g }, { 'base': 'Q', 'letters': /[\u0051\u24C6\uFF31\uA756\uA758\u024A]/g }, { 'base': 'R', 'letters': /[\u0052\u24C7\uFF32\u0154\u1E58\u0158\u0210\u0212\u1E5A\u1E5C\u0156\u1E5E\u024C\u2C64\uA75A\uA7A6\uA782]/g }, { 'base': 'S', 'letters': /[\u0053\u24C8\uFF33\u1E9E\u015A\u1E64\u015C\u1E60\u0160\u1E66\u1E62\u1E68\u0218\u015E\u2C7E\uA7A8\uA784]/g }, { 'base': 'T', 'letters': /[\u0054\u24C9\uFF34\u1E6A\u0164\u1E6C\u021A\u0162\u1E70\u1E6E\u0166\u01AC\u01AE\u023E\uA786]/g }, { 'base': 'TZ', 'letters': /[\uA728]/g }, { 'base': 'U', 'letters': /[\u0055\u24CA\uFF35\u00D9\u00DA\u00DB\u0168\u1E78\u016A\u1E7A\u016C\u00DC\u01DB\u01D7\u01D5\u01D9\u1EE6\u016E\u0170\u01D3\u0214\u0216\u01AF\u1EEA\u1EE8\u1EEE\u1EEC\u1EF0\u1EE4\u1E72\u0172\u1E76\u1E74\u0244]/g }, { 'base': 'V', 'letters': /[\u0056\u24CB\uFF36\u1E7C\u1E7E\u01B2\uA75E\u0245]/g }, { 'base': 'VY', 'letters': /[\uA760]/g }, { 'base': 'W', 'letters': /[\u0057\u24CC\uFF37\u1E80\u1E82\u0174\u1E86\u1E84\u1E88\u2C72]/g }, { 'base': 'X', 'letters': /[\u0058\u24CD\uFF38\u1E8A\u1E8C]/g }, { 'base': 'Y', 'letters': /[\u0059\u24CE\uFF39\u1EF2\u00DD\u0176\u1EF8\u0232\u1E8E\u0178\u1EF6\u1EF4\u01B3\u024E\u1EFE]/g }, { 'base': 'Z', 'letters': /[\u005A\u24CF\uFF3A\u0179\u1E90\u017B\u017D\u1E92\u1E94\u01B5\u0224\u2C7F\u2C6B\uA762]/g }, { 'base': 'a', 'letters': /[\u0061\u24D0\uFF41\u1E9A\u00E0\u00E1\u00E2\u1EA7\u1EA5\u1EAB\u1EA9\u00E3\u0101\u0103\u1EB1\u1EAF\u1EB5\u1EB3\u0227\u01E1\u00E4\u01DF\u1EA3\u00E5\u01FB\u01CE\u0201\u0203\u1EA1\u1EAD\u1EB7\u1E01\u0105\u2C65\u0250]/g }, { 'base': 'aa', 'letters': /[\uA733]/g }, { 'base': 'ae', 'letters': /[\u00E6\u01FD\u01E3]/g }, { 'base': 'ao', 'letters': /[\uA735]/g }, { 'base': 'au', 'letters': /[\uA737]/g }, { 'base': 'av', 'letters': /[\uA739\uA73B]/g }, { 'base': 'ay', 'letters': /[\uA73D]/g }, { 'base': 'b', 'letters': /[\u0062\u24D1\uFF42\u1E03\u1E05\u1E07\u0180\u0183\u0253]/g }, { 'base': 'c', 'letters': /[\u0063\u24D2\uFF43\u0107\u0109\u010B\u010D\u00E7\u1E09\u0188\u023C\uA73F\u2184]/g }, { 'base': 'd', 'letters': /[\u0064\u24D3\uFF44\u1E0B\u010F\u1E0D\u1E11\u1E13\u1E0F\u0111\u018C\u0256\u0257\uA77A]/g }, { 'base': 'dz', 'letters': /[\u01F3\u01C6]/g }, { 'base': 'e', 'letters': /[\u0065\u24D4\uFF45\u00E8\u00E9\u00EA\u1EC1\u1EBF\u1EC5\u1EC3\u1EBD\u0113\u1E15\u1E17\u0115\u0117\u00EB\u1EBB\u011B\u0205\u0207\u1EB9\u1EC7\u0229\u1E1D\u0119\u1E19\u1E1B\u0247\u025B\u01DD]/g }, { 'base': 'f', 'letters': /[\u0066\u24D5\uFF46\u1E1F\u0192\uA77C]/g }, { 'base': 'g', 'letters': /[\u0067\u24D6\uFF47\u01F5\u011D\u1E21\u011F\u0121\u01E7\u0123\u01E5\u0260\uA7A1\u1D79\uA77F]/g }, { 'base': 'h', 'letters': /[\u0068\u24D7\uFF48\u0125\u1E23\u1E27\u021F\u1E25\u1E29\u1E2B\u1E96\u0127\u2C68\u2C76\u0265]/g }, { 'base': 'hv', 'letters': /[\u0195]/g }, { 'base': 'i', 'letters': /[\u0069\u24D8\uFF49\u00EC\u00ED\u00EE\u0129\u012B\u012D\u00EF\u1E2F\u1EC9\u01D0\u0209\u020B\u1ECB\u012F\u1E2D\u0268\u0131]/g }, { 'base': 'j', 'letters': /[\u006A\u24D9\uFF4A\u0135\u01F0\u0249]/g }, { 'base': 'k', 'letters': /[\u006B\u24DA\uFF4B\u1E31\u01E9\u1E33\u0137\u1E35\u0199\u2C6A\uA741\uA743\uA745\uA7A3]/g }, { 'base': 'l', 'letters': /[\u006C\u24DB\uFF4C\u0140\u013A\u013E\u1E37\u1E39\u013C\u1E3D\u1E3B\u017F\u0142\u019A\u026B\u2C61\uA749\uA781\uA747]/g }, { 'base': 'lj', 'letters': /[\u01C9]/g }, { 'base': 'm', 'letters': /[\u006D\u24DC\uFF4D\u1E3F\u1E41\u1E43\u0271\u026F]/g }, { 'base': 'n', 'letters': /[\u006E\u24DD\uFF4E\u01F9\u0144\u00F1\u1E45\u0148\u1E47\u0146\u1E4B\u1E49\u019E\u0272\u0149\uA791\uA7A5]/g }, { 'base': 'nj', 'letters': /[\u01CC]/g }, { 'base': 'o', 'letters': /[\u006F\u24DE\uFF4F\u00F2\u00F3\u00F4\u1ED3\u1ED1\u1ED7\u1ED5\u00F5\u1E4D\u022D\u1E4F\u014D\u1E51\u1E53\u014F\u022F\u0231\u00F6\u022B\u1ECF\u0151\u01D2\u020D\u020F\u01A1\u1EDD\u1EDB\u1EE1\u1EDF\u1EE3\u1ECD\u1ED9\u01EB\u01ED\u00F8\u01FF\u0254\uA74B\uA74D\u0275]/g }, { 'base': 'oi', 'letters': /[\u01A3]/g }, { 'base': 'ou', 'letters': /[\u0223]/g }, { 'base': 'oo', 'letters': /[\uA74F]/g }, { 'base': 'p', 'letters': /[\u0070\u24DF\uFF50\u1E55\u1E57\u01A5\u1D7D\uA751\uA753\uA755]/g }, { 'base': 'q', 'letters': /[\u0071\u24E0\uFF51\u024B\uA757\uA759]/g }, { 'base': 'r', 'letters': /[\u0072\u24E1\uFF52\u0155\u1E59\u0159\u0211\u0213\u1E5B\u1E5D\u0157\u1E5F\u024D\u027D\uA75B\uA7A7\uA783]/g }, { 'base': 's', 'letters': /[\u0073\u24E2\uFF53\u00DF\u015B\u1E65\u015D\u1E61\u0161\u1E67\u1E63\u1E69\u0219\u015F\u023F\uA7A9\uA785\u1E9B]/g }, { 'base': 't', 'letters': /[\u0074\u24E3\uFF54\u1E6B\u1E97\u0165\u1E6D\u021B\u0163\u1E71\u1E6F\u0167\u01AD\u0288\u2C66\uA787]/g }, { 'base': 'tz', 'letters': /[\uA729]/g }, { 'base': 'u', 'letters': /[\u0075\u24E4\uFF55\u00F9\u00FA\u00FB\u0169\u1E79\u016B\u1E7B\u016D\u00FC\u01DC\u01D8\u01D6\u01DA\u1EE7\u016F\u0171\u01D4\u0215\u0217\u01B0\u1EEB\u1EE9\u1EEF\u1EED\u1EF1\u1EE5\u1E73\u0173\u1E77\u1E75\u0289]/g }, { 'base': 'v', 'letters': /[\u0076\u24E5\uFF56\u1E7D\u1E7F\u028B\uA75F\u028C]/g }, { 'base': 'vy', 'letters': /[\uA761]/g }, { 'base': 'w', 'letters': /[\u0077\u24E6\uFF57\u1E81\u1E83\u0175\u1E87\u1E85\u1E98\u1E89\u2C73]/g }, { 'base': 'x', 'letters': /[\u0078\u24E7\uFF58\u1E8B\u1E8D]/g }, { 'base': 'y', 'letters': /[\u0079\u24E8\uFF59\u1EF3\u00FD\u0177\u1EF9\u0233\u1E8F\u00FF\u1EF7\u1E99\u1EF5\u01B4\u024F\u1EFF]/g }, { 'base': 'z', 'letters': /[\u007A\u24E9\uFF5A\u017A\u1E91\u017C\u017E\u1E93\u1E95\u01B6\u0225\u0240\u2C6C\uA763]/g }];
@@ -24,6 +26,10 @@ function stripDiacritics(str) {
 		str = str.replace(map[i].letters, map[i].base);
 	}
 	return str;
+}
+
+function trim(str) {
+    return str.replace(/^\s+|\s+$/g, '');
 }
 
 function filterOptions(options, filterValue, excludeOptions, props) {
@@ -37,6 +43,10 @@ function filterOptions(options, filterValue, excludeOptions, props) {
 		filterValue = filterValue.toLowerCase();
 	}
 
+	if (props.trimFilter) {
+		filterValue = trim(filterValue);
+	}
+
 	if (excludeOptions) excludeOptions = excludeOptions.map(function (i) {
 		return i[props.valueKey];
 	});
@@ -47,10 +57,12 @@ function filterOptions(options, filterValue, excludeOptions, props) {
 		if (!filterValue) return true;
 		var valueTest = String(option[props.valueKey]);
 		var labelTest = String(option[props.labelKey]);
+
 		if (props.ignoreAccents) {
 			if (props.matchProp !== 'label') valueTest = stripDiacritics(valueTest);
 			if (props.matchProp !== 'value') labelTest = stripDiacritics(labelTest);
 		}
+
 		if (props.ignoreCase) {
 			if (props.matchProp !== 'label') valueTest = valueTest.toLowerCase();
 			if (props.matchProp !== 'value') labelTest = labelTest.toLowerCase();
@@ -76,7 +88,9 @@ function menuRenderer(_ref) {
 	var Option = optionComponent;
 
 	return options.map(function (option, i) {
-		var isSelected = valueArray && valueArray.indexOf(option) > -1;
+		var isSelected = valueArray && valueArray.some(function (x) {
+			return x[valueKey] == option[valueKey];
+		});
 		var isFocused = option === focusedOption;
 		var optionClass = classNames(optionClassName, {
 			'Select-option': true,
@@ -114,7 +128,6 @@ function clearRenderer() {
 	});
 }
 
-var babelHelpers = {};
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -345,28 +358,6 @@ var possibleConstructorReturn = function (self, call) {
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-babelHelpers;
-
 var Option = function (_React$Component) {
 	inherits(Option, _React$Component);
 
@@ -465,6 +456,7 @@ var Option = function (_React$Component) {
 				{ className: className,
 					style: option.style,
 					role: 'option',
+					'aria-label': option.label,
 					onMouseDown: this.handleMouseDown,
 					onMouseEnter: this.handleMouseEnter,
 					onMouseMove: this.handleMouseMove,
@@ -483,17 +475,17 @@ var Option = function (_React$Component) {
 
 
 Option.propTypes = {
-	children: PropTypes.node,
-	className: PropTypes.string, // className (based on mouse position)
-	instancePrefix: PropTypes.string.isRequired, // unique prefix for the ids (used for aria)
-	isDisabled: PropTypes.bool, // the option is disabled
-	isFocused: PropTypes.bool, // the option is focused
-	isSelected: PropTypes.bool, // the option is selected
-	onFocus: PropTypes.func, // method to handle mouseEnter on option element
-	onSelect: PropTypes.func, // method to handle click on option element
-	onUnfocus: PropTypes.func, // method to handle mouseLeave on option element
-	option: PropTypes.object.isRequired, // object that is base for that option
-	optionIndex: PropTypes.number // index of the option, used to generate unique ids for aria
+	children: PropTypes$1.node,
+	className: PropTypes$1.string, // className (based on mouse position)
+	instancePrefix: PropTypes$1.string.isRequired, // unique prefix for the ids (used for aria)
+	isDisabled: PropTypes$1.bool, // the option is disabled
+	isFocused: PropTypes$1.bool, // the option is focused
+	isSelected: PropTypes$1.bool, // the option is selected
+	onFocus: PropTypes$1.func, // method to handle mouseEnter on option element
+	onSelect: PropTypes$1.func, // method to handle click on option element
+	onUnfocus: PropTypes$1.func, // method to handle mouseLeave on option element
+	option: PropTypes$1.object.isRequired, // object that is base for that option
+	optionIndex: PropTypes$1.number // index of the option, used to generate unique ids for aria
 };
 
 var Value = function (_React$Component) {
@@ -590,8 +582,9 @@ var Value = function (_React$Component) {
 		value: function render() {
 			return React.createElement(
 				'div',
-				{ className: classNames('Select-value', this.props.value.className),
-					style: this.props.value.style,
+				{
+					className: classNames('Select-value', this.props.value.className),
+					style: _extends({}, this.props.style),
 					title: this.props.value.title
 				},
 				this.renderRemoveIcon(),
@@ -602,16 +595,159 @@ var Value = function (_React$Component) {
 	return Value;
 }(React.Component);
 
-
-
 Value.propTypes = {
-	children: PropTypes.node,
-	disabled: PropTypes.bool, // disabled prop passed to ReactSelect
-	id: PropTypes.string, // Unique id for the value - used for aria
-	onClick: PropTypes.func, // method to handle click on value label
-	onRemove: PropTypes.func, // method to handle removal of the value
-	value: PropTypes.object.isRequired // the option object for this value
+	children: PropTypes$1.node,
+	disabled: PropTypes$1.bool, // disabled prop passed to ReactSelect
+	id: PropTypes$1.string, // Unique id for the value - used for aria
+	onClick: PropTypes$1.func, // method to handle click on value label
+	onRemove: PropTypes$1.func, // method to handle removal of the value
+	value: PropTypes$1.object.isRequired // the option object for this value
 };
+
+var Dom = {
+	isDescendant: function isDescendant(parent, child) {
+		var node = child.parentNode;
+
+		while (node !== null) {
+			if (node === parent) return true;
+			node = node.parentNode;
+		}
+
+		return false;
+	},
+	offset: function offset(el) {
+		var rect = el.getBoundingClientRect();
+		return {
+			top: rect.top + document.body.scrollTop,
+			left: rect.left + document.body.scrollLeft
+		};
+	}
+};
+
+// heavily inspired by https://github.com/Khan/react-components/blob/master/js/layered-component-mixin.jsx
+
+var RenderToLayer = function (_Component) {
+	inherits(RenderToLayer, _Component);
+
+	function RenderToLayer() {
+		classCallCheck(this, RenderToLayer);
+		return possibleConstructorReturn(this, (RenderToLayer.__proto__ || Object.getPrototypeOf(RenderToLayer)).apply(this, arguments));
+	}
+
+	createClass(RenderToLayer, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			this.renderLayer();
+		}
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			this.renderLayer();
+		}
+	}, {
+		key: 'componentWillUnmount',
+		value: function componentWillUnmount() {
+			this.unrenderLayer();
+		}
+	}, {
+		key: 'onClickAway',
+		value: function onClickAway(event) {
+			if (event.defaultPrevented) {
+				return;
+			}
+
+			if (this.props && !this.props.componentClickAway) {
+				return;
+			}
+
+			if (this.props && !this.props.open) {
+				return;
+			}
+
+			var el = this.layer;
+			if (event.target !== el && event.target === window || document.documentElement.contains(event.target) && !Dom.isDescendant(el, event.target)) {
+				if (this.props) {
+					this.props.componentClickAway(event);
+				}
+			}
+		}
+	}, {
+		key: 'getLayer',
+		value: function getLayer() {
+			return this.layer;
+		}
+	}, {
+		key: 'unrenderLayer',
+		value: function unrenderLayer() {
+			if (!this.layer) {
+				return;
+			}
+
+			if (this.props.useLayerForClickAway) {
+				this.layer.style.position = 'fixed';
+				this.layer.removeEventListener('touchstart', this.onClickAway);
+				this.layer.removeEventListener('click', this.onClickAway);
+			} else {
+				window.removeEventListener('touchstart', this.onClickAway);
+				window.removeEventListener('click', this.onClickAway);
+			}
+
+			unmountComponentAtNode(this.layer);
+			document.body.removeChild(this.layer);
+			this.layer = null;
+		}
+
+		/**
+   * By calling this method in componentDidMount() and
+   * componentDidUpdate(), you're effectively creating a "wormhole" that
+   * funnels React's hierarchical updates through to a DOM node on an
+   * entirely different part of the page.
+   */
+
+	}, {
+		key: 'renderLayer',
+		value: function renderLayer() {
+			var _this2 = this;
+
+			var _props = this.props,
+			    open = _props.open,
+			    render = _props.render;
+
+
+			if (open) {
+				if (!this.layer) {
+					this.layer = document.createElement('div');
+					document.body.appendChild(this.layer);
+
+					if (this.props.useLayerForClickAway) {
+						this.layer.addEventListener('touchstart', this.onClickAway);
+						this.layer.addEventListener('click', this.onClickAway);
+						this.layer.style.position = 'fixed';
+						this.layer.style.top = 0;
+						this.layer.style.bottom = 0;
+						this.layer.style.left = 0;
+						this.layer.style.right = 0;
+					} else {
+						setTimeout(function () {
+							window.addEventListener('touchstart', _this2.onClickAway);
+							window.addEventListener('click', _this2.onClickAway);
+						}, 0);
+					}
+				}
+				var layerElement = render;
+				this.layerElement = unstable_renderSubtreeIntoContainer(this, layerElement, this.layer);
+			} else {
+				this.unrenderLayer();
+			}
+		}
+	}, {
+		key: 'render',
+		value: function render() {
+			return null;
+		}
+	}]);
+	return RenderToLayer;
+}(Component);
 
 /*!
   Copyright (c) 2017 Jed Watson.
@@ -622,7 +758,7 @@ var stringifyValue = function stringifyValue(value) {
 	return typeof value === 'string' ? value : value !== null && JSON.stringify(value) || '';
 };
 
-var stringOrNode = PropTypes.oneOfType([PropTypes.string, PropTypes.node]);
+var stringOrNode = PropTypes$1.oneOfType([PropTypes$1.string, PropTypes$1.node]);
 
 var instanceId = 1;
 
@@ -634,7 +770,7 @@ var Select$1 = function (_React$Component) {
 
 		var _this = possibleConstructorReturn(this, (Select.__proto__ || Object.getPrototypeOf(Select)).call(this, props));
 
-		['clearValue', 'focusOption', 'handleInputBlur', 'handleInputChange', 'handleInputFocus', 'handleInputValueChange', 'handleKeyDown', 'handleMenuScroll', 'handleMouseDown', 'handleMouseDownOnArrow', 'handleMouseDownOnMenu', 'handleRequired', 'handleTouchOutside', 'handleTouchMove', 'handleTouchStart', 'handleTouchEnd', 'handleTouchEndClearValue', 'handleValueClick', 'getOptionLabel', 'onOptionRef', 'removeValue', 'selectValue'].forEach(function (fn) {
+		['clearValue', 'focusOption', 'handleInputBlur', 'handleInputChange', 'handleInputFocus', 'handleInputValueChange', 'handleKeyDown', 'handleMenuScroll', 'handleMouseDown', 'handleMouseDownOnArrow', 'handleMouseDownOnMenu', 'handleRequired', 'handleTouchOutside', 'handleTouchMove', 'handleTouchStart', 'handleTouchEnd', 'handleTouchEndClearValue', 'handleValueClick', 'getOptionLabel', 'onOptionRef', 'removeValue', 'selectValue', 'componentClickAway', 'requestClose', 'getAnchorPosition', 'getOffset', 'getTargetPosition', 'setPlacement', 'autoCloseWhenOffScreen'].forEach(function (fn) {
 			return _this[fn] = _this[fn].bind(_this);
 		});
 
@@ -659,11 +795,17 @@ var Select$1 = function (_React$Component) {
 					required: this.handleRequired(valueArray[0], this.props.multi)
 				});
 			}
+
+			this.handleResize = _.throttle(this.setPlacement, 100);
+			this.handleScroll = _.throttle(this.setPlacement.bind(this, true), 50);
 		}
 	}, {
 		key: 'componentDidMount',
 		value: function componentDidMount() {
-			if (this.props.autofocus) {
+			if (typeof this.props.autofocus !== 'undefined' && typeof console !== 'undefined') {
+				console.warn('Warning: The autofocus prop will be deprecated in react-select1.0.0 in favor of autoFocus to match React\'s autoFocus prop');
+			}
+			if (this.props.autoFocus || this.props.autofocus) {
 				this.focus();
 			}
 		}
@@ -682,17 +824,11 @@ var Select$1 = function (_React$Component) {
 			}
 		}
 	}, {
-		key: 'componentWillUpdate',
-		value: function componentWillUpdate(nextProps, nextState) {
-			if (nextState.isOpen !== this.state.isOpen) {
-				this.toggleTouchOutsideEvent(nextState.isOpen);
-				var handler = nextState.isOpen ? nextProps.onOpen : nextProps.onClose;
-				handler && handler();
-			}
-		}
-	}, {
 		key: 'componentDidUpdate',
 		value: function componentDidUpdate(prevProps, prevState) {
+
+			this.setPlacement();
+
 			// focus to the selected option
 			if (this.menu && this.focused && this.state.isOpen && !this.hasScrolledToOption) {
 				var focusedOptionNode = ReactDOM.findDOMNode(this.focused);
@@ -725,15 +861,18 @@ var Select$1 = function (_React$Component) {
 				this.setState({ isFocused: false }); // eslint-disable-line react/no-did-update-set-state
 				this.closeMenu();
 			}
+			if (prevState.isOpen !== this.state.isOpen) {
+				this.toggleTouchOutsideEvent(this.state.isOpen);
+				var handler = this.state.isOpen ? this.props.onOpen : this.props.onClose;
+				handler && handler();
+			}
 		}
 	}, {
 		key: 'componentWillUnmount',
 		value: function componentWillUnmount() {
-			if (!document.removeEventListener && document.detachEvent) {
-				document.detachEvent('ontouchstart', this.handleTouchOutside);
-			} else {
-				document.removeEventListener('touchstart', this.handleTouchOutside);
-			}
+			this.toggleTouchOutsideEvent(false);
+			this.handleResize.cancel();
+			this.handleScroll.cancel();
 		}
 	}, {
 		key: 'toggleTouchOutsideEvent',
@@ -993,13 +1132,19 @@ var Select$1 = function (_React$Component) {
 					if (event.shiftKey || !this.state.isOpen || !this.props.tabSelectsValue) {
 						return;
 					}
+					event.preventDefault();
 					this.selectFocusedOption();
 					return;
 				case 13:
 					// enter
-					if (!this.state.isOpen) return;
+					event.preventDefault();
 					event.stopPropagation();
-					this.selectFocusedOption();
+					if (this.state.isOpen) {
+						this.selectFocusedOption();
+					} else {
+						this.focusNextOption();
+					}
+					return;
 					break;
 				case 27:
 					// escape
@@ -1010,6 +1155,18 @@ var Select$1 = function (_React$Component) {
 						this.clearValue(event);
 						event.stopPropagation();
 					}
+					break;
+				case 32:
+					// space
+					if (!this.props.searchable) {
+						event.preventDefault();
+					}
+					if (!this.state.isOpen) {
+						this.focusNextOption();
+						return;
+					}
+					event.stopPropagation();
+					this.selectFocusedOption();
 					break;
 				case 38:
 					// up
@@ -1042,7 +1199,7 @@ var Select$1 = function (_React$Component) {
 					this.focusStartOption();
 					break;
 				case 46:
-					// backspace
+					// delete
 					if (!this.state.inputValue && this.props.deleteRemoves) {
 						event.preventDefault();
 						this.popValue();
@@ -1096,7 +1253,9 @@ var Select$1 = function (_React$Component) {
 			/** support optionally passing in the `nextProps` so `componentWillReceiveProps` updates will function as expected */
 			var props = (typeof nextProps === 'undefined' ? 'undefined' : _typeof(nextProps)) === 'object' ? nextProps : this.props;
 			if (props.multi) {
-				if (typeof value === 'string') value = value.split(props.delimiter);
+				if (typeof value === 'string') {
+					value = value.split(props.delimiter);
+				}
 				if (!Array.isArray(value)) {
 					if (value === null || value === undefined) return [];
 					value = [value];
@@ -1127,7 +1286,7 @@ var Select$1 = function (_React$Component) {
 
 			if (!options) return;
 			for (var i = 0; i < options.length; i++) {
-				if (options[i][valueKey] === value) return options[i];
+				if (String(options[i][valueKey]) === String(value)) return options[i];
 			}
 		}
 	}, {
@@ -1168,7 +1327,14 @@ var Select$1 = function (_React$Component) {
 					inputValue: this.handleInputValueChange(updatedValue),
 					isOpen: !this.props.closeOnSelect
 				}, function () {
-					_this4.addValue(value);
+					var valueArray = _this4.getValueArray(_this4.props.value);
+					if (valueArray.some(function (i) {
+						return i[_this4.props.valueKey] === value[_this4.props.valueKey];
+					})) {
+						_this4.removeValue(value);
+					} else {
+						_this4.addValue(value);
+					}
 				});
 			} else {
 				this.setState({
@@ -1208,9 +1374,11 @@ var Select$1 = function (_React$Component) {
 	}, {
 		key: 'removeValue',
 		value: function removeValue(value) {
+			var _this5 = this;
+
 			var valueArray = this.getValueArray(this.props.value);
 			this.setValue(valueArray.filter(function (i) {
-				return i !== value;
+				return i[_this5.props.valueKey] !== value[_this5.props.valueKey];
 			}));
 			this.focus();
 		}
@@ -1370,14 +1538,14 @@ var Select$1 = function (_React$Component) {
 	}, {
 		key: 'renderValue',
 		value: function renderValue(valueArray, isOpen) {
-			var _this5 = this;
+			var _this6 = this;
 
 			var renderLabel = this.props.valueRenderer || this.getOptionLabel;
 			var ValueComponent = this.props.valueComponent;
 			if (!valueArray.length) {
 				return !this.state.inputValue ? React.createElement(
 					'div',
-					{ className: 'Select-placeholder' },
+					{ className: 'Select-placeholder', style: this.props.inputStyle },
 					this.props.placeholder
 				) : null;
 			}
@@ -1387,13 +1555,14 @@ var Select$1 = function (_React$Component) {
 					return React.createElement(
 						ValueComponent,
 						{
-							id: _this5._instancePrefix + '-value-' + i,
-							instancePrefix: _this5._instancePrefix,
-							disabled: _this5.props.disabled || value.clearableValue === false,
-							key: 'value-' + i + '-' + value[_this5.props.valueKey],
+							id: _this6._instancePrefix + '-value-' + i,
+							instancePrefix: _this6._instancePrefix,
+							disabled: _this6.props.disabled || value.clearableValue === false,
+							key: 'value-' + i + '-' + value[_this6.props.valueKey],
 							onClick: onClick,
-							onRemove: _this5.removeValue,
-							value: value
+							onRemove: _this6.removeValue,
+							value: value,
+							style: _this6.props.inputStyle
 						},
 						renderLabel(value, i),
 						React.createElement(
@@ -1412,7 +1581,8 @@ var Select$1 = function (_React$Component) {
 						disabled: this.props.disabled,
 						instancePrefix: this._instancePrefix,
 						onClick: onClick,
-						value: valueArray[0]
+						value: valueArray[0],
+						style: this.props.inputStyle
 					},
 					renderLabel(valueArray[0])
 				);
@@ -1422,13 +1592,12 @@ var Select$1 = function (_React$Component) {
 		key: 'renderInput',
 		value: function renderInput(valueArray, focusedOptionIndex) {
 			var _classNames,
-			    _this6 = this;
+			    _this7 = this;
 
 			var className = classNames('Select-input', this.props.inputProps.className);
 			var isOpen = !!this.state.isOpen;
 
 			var ariaOwns = classNames((_classNames = {}, defineProperty(_classNames, this._instancePrefix + '-list', isOpen), defineProperty(_classNames, this._instancePrefix + '-backspace-remove-message', this.props.multi && !this.props.disabled && this.state.isFocused && !this.state.inputValue), _classNames));
-
 			var inputProps = _extends({}, this.props.inputProps, {
 				role: 'combobox',
 				'aria-expanded': '' + isOpen,
@@ -1444,10 +1613,11 @@ var Select$1 = function (_React$Component) {
 				onChange: this.handleInputChange,
 				onFocus: this.handleInputFocus,
 				ref: function ref(_ref) {
-					return _this6.input = _ref;
+					return _this7.input = _ref;
 				},
 				required: this.state.required,
-				value: this.state.inputValue
+				value: this.state.inputValue,
+				style: _extends({}, this.props.inputStyle)
 			});
 
 			if (this.props.inputRenderer) {
@@ -1461,36 +1631,39 @@ var Select$1 = function (_React$Component) {
 
 
 				var _ariaOwns = classNames(defineProperty({}, this._instancePrefix + '-list', isOpen));
-
 				return React.createElement('div', _extends({}, divProps, {
 					role: 'combobox',
 					'aria-expanded': isOpen,
 					'aria-owns': _ariaOwns,
 					'aria-activedescendant': isOpen ? this._instancePrefix + '-option-' + focusedOptionIndex : this._instancePrefix + '-value',
+					'aria-labelledby': this.props['aria-labelledby'],
+					'aria-label': this.props['aria-label'],
 					className: className,
 					tabIndex: this.props.tabIndex || 0,
 					onBlur: this.handleInputBlur,
 					onFocus: this.handleInputFocus,
 					ref: function ref(_ref2) {
-						return _this6.input = _ref2;
+						return _this7.input = _ref2;
 					},
-					'aria-readonly': '' + !!this.props.disabled,
-					style: { border: 0, width: 1, display: 'inline-block' } }));
+					'aria-disabled': '' + !!this.props.disabled,
+					style: this.props.inputStyle
+				}));
 			}
 
 			if (this.props.autosize) {
-				return React.createElement(AutosizeInput, _extends({}, inputProps, { minWidth: '5' }));
+				return React.createElement(AutosizeInput, _extends({ id: this.props.id }, inputProps, { minWidth: '5', style: _extends({}, this.props.inputStyle) }));
 			}
 			return React.createElement(
 				'div',
-				{ className: className },
-				React.createElement('input', inputProps)
+				{ className: className, key: 'input-wrap', style: _extends({}, this.props.inputStyle) },
+				React.createElement('input', _extends({ id: this.props.id }, inputProps))
 			);
 		}
 	}, {
 		key: 'renderClear',
 		value: function renderClear() {
-			if (!this.props.clearable || this.props.value === undefined || this.props.value === null || this.props.multi && !this.props.value.length || this.props.disabled || this.props.isLoading) return;
+			var valueArray = this.getValueArray(this.props.value);
+			if (!this.props.clearable || !valueArray.length || this.props.disabled || this.props.isLoading) return;
 			var clear = this.props.clearRenderer();
 
 			return React.createElement(
@@ -1508,15 +1681,22 @@ var Select$1 = function (_React$Component) {
 	}, {
 		key: 'renderArrow',
 		value: function renderArrow() {
+			if (!this.props.arrowRenderer) return;
+
 			var onMouseDown = this.handleMouseDownOnArrow;
 			var isOpen = this.state.isOpen;
 			var arrow = this.props.arrowRenderer({ onMouseDown: onMouseDown, isOpen: isOpen });
+
+			if (!arrow) {
+				return null;
+			}
 
 			return React.createElement(
 				'span',
 				{
 					className: 'Select-arrow-zone',
-					onMouseDown: onMouseDown
+					onMouseDown: onMouseDown,
+					style: this.props.arrowStyle
 				},
 				arrow
 			);
@@ -1537,7 +1717,8 @@ var Select$1 = function (_React$Component) {
 					labelKey: this.props.labelKey,
 					matchPos: this.props.matchPos,
 					matchProp: this.props.matchProp,
-					valueKey: this.props.valueKey
+					valueKey: this.props.valueKey,
+					trimFilter: this.props.trimFilter
 				});
 			} else {
 				return options;
@@ -1557,6 +1738,7 @@ var Select$1 = function (_React$Component) {
 				return this.props.menuRenderer({
 					focusedOption: focusedOption,
 					focusOption: this.focusOption,
+					inputValue: this.state.inputValue,
 					instancePrefix: this._instancePrefix,
 					labelKey: this.props.labelKey,
 					onFocus: this.focusOption,
@@ -1566,6 +1748,7 @@ var Select$1 = function (_React$Component) {
 					optionRenderer: this.props.optionRenderer || this.getOptionLabel,
 					options: options,
 					selectValue: this.selectValue,
+					removeValue: this.removeValue,
 					valueArray: valueArray,
 					valueKey: this.props.valueKey,
 					onOptionRef: this.onOptionRef
@@ -1583,17 +1766,17 @@ var Select$1 = function (_React$Component) {
 	}, {
 		key: 'renderHiddenField',
 		value: function renderHiddenField(valueArray) {
-			var _this7 = this;
+			var _this8 = this;
 
 			if (!this.props.name) return;
 			if (this.props.joinValues) {
 				var value = valueArray.map(function (i) {
-					return stringifyValue(i[_this7.props.valueKey]);
+					return stringifyValue(i[_this8.props.valueKey]);
 				}).join(this.props.delimiter);
 				return React.createElement('input', {
 					type: 'hidden',
 					ref: function ref(_ref3) {
-						return _this7.value = _ref3;
+						return _this8.value = _ref3;
 					},
 					name: this.props.name,
 					value: value,
@@ -1603,9 +1786,9 @@ var Select$1 = function (_React$Component) {
 				return React.createElement('input', { key: 'hidden.' + index,
 					type: 'hidden',
 					ref: 'value' + index,
-					name: _this7.props.name,
-					value: stringifyValue(item[_this7.props.valueKey]),
-					disabled: _this7.props.disabled });
+					name: _this8.props.name,
+					value: stringifyValue(item[_this8.props.valueKey]),
+					disabled: _this8.props.disabled });
 			});
 		}
 	}, {
@@ -1638,7 +1821,7 @@ var Select$1 = function (_React$Component) {
 	}, {
 		key: 'renderOuter',
 		value: function renderOuter(options, valueArray, focusedOption) {
-			var _this8 = this;
+			var _this9 = this;
 
 			var menu = this.renderMenu(options, valueArray, focusedOption);
 			if (!menu) {
@@ -1648,12 +1831,12 @@ var Select$1 = function (_React$Component) {
 			return React.createElement(
 				'div',
 				{ ref: function ref(_ref5) {
-						return _this8.menuContainer = _ref5;
+						return _this9.menuContainer = _ref5;
 					}, className: 'Select-menu-outer', style: this.props.menuContainerStyle },
 				React.createElement(
 					'div',
 					{ ref: function ref(_ref4) {
-							return _this8.menu = _ref4;
+							return _this9.menu = _ref4;
 						}, role: 'listbox', tabIndex: -1, className: 'Select-menu', id: this._instancePrefix + '-list',
 						style: this.props.menuStyle,
 						onScroll: this.handleMenuScroll,
@@ -1662,13 +1845,122 @@ var Select$1 = function (_React$Component) {
 				)
 			);
 		}
+
+		// Request Close when click away
+
+	}, {
+		key: 'componentClickAway',
+		value: function componentClickAway(event) {
+			event.preventDefault();
+			this.requestClose('clickAway');
+		}
+	}, {
+		key: 'requestClose',
+		value: function requestClose(reason) {
+			if (this.props.onRequestClose) {
+				this.props.onRequestClose(reason);
+			}
+		}
+
+		// Get element (react-select input) position in the DOM
+
+	}, {
+		key: 'getAnchorPosition',
+		value: function getAnchorPosition(el) {
+			if (!el) {
+				el = ReactDOM.findDOMNode(this);
+			}
+
+			var rect = ReactDOM.findDOMNode(this).getBoundingClientRect();
+			var a = {
+				top: rect.top,
+				left: rect.left,
+				width: el.offsetWidth,
+				height: el.offsetHeight
+			};
+
+			a.bottom = rect.bottom || a.top + a.height;
+			a.middle = a.left + (a.right - a.left) / 2;
+			a.center = a.top + (a.bottom - a.top) / 2;
+			a.right = rect.right || a.left + a.width;
+
+			return a;
+		}
+	}, {
+		key: 'getOffset',
+		value: function getOffset(obj, offsetProp) {
+			var offset = 0;
+			var currentObj = obj;
+			while (currentObj) {
+				offset += currentObj[offsetProp];
+				currentObj = currentObj.offsetParent;
+			}
+			return offset;
+		}
+
+		// Get target position (dropdown menu)
+
+	}, {
+		key: 'getTargetPosition',
+		value: function getTargetPosition(targetEl) {
+			return {
+				top: 0,
+				center: targetEl.offsetHeight / 2,
+				bottom: targetEl.offsetHeight,
+				left: 0,
+				middle: targetEl.offsetWidth / 2,
+				right: targetEl.offsetWidth
+			};
+		}
+
+		// Set dropdown menu fixed position on screen
+
+	}, {
+		key: 'setPlacement',
+		value: function setPlacement(scrolling) {
+
+			var targetEl = null;
+			var options = this._visibleOptions = this.filterOptions(this.props.multi ? this.getValueArray(this.props.value) : null);
+
+			if (!this.state.isOpen && !this.props.isOpen) {
+				return;
+			}
+
+			targetEl = this.refs.layer ? this.refs.layer.getLayer().children[0] : null;
+			if (!targetEl) {
+				return;
+			}
+
+			var anchor = this.getAnchorPosition(ReactDOM.findDOMNode(this.wrapper));
+			var target = this.getTargetPosition(targetEl);
+
+			if (scrolling && this.props.autoCloseWhenOffScreen) {
+				this.autoCloseWhenOffScreen(anchor);
+			}
+
+			targetEl.style.top = Math.max(0, anchor.bottom) + 'px';
+			targetEl.style.left = Math.max(0, anchor.left) + 'px';
+			targetEl.style.maxHeight = window.innerHeight + 'px';
+			targetEl.style.position = 'fixed';
+			targetEl.style.width = Math.max(0, anchor.width) + 'px';
+		}
+
+		// Close dropdown when offscreen
+
+	}, {
+		key: 'autoCloseWhenOffScreen',
+		value: function autoCloseWhenOffScreen(anchorPosition) {
+			if (anchorPosition.top < 0 || anchorPosition.top > window.innerHeight || anchorPosition.left < 0 || anchorPosition.left > window.innerWidth) {
+				this.requestClose('offScreen');
+			}
+		}
 	}, {
 		key: 'render',
 		value: function render() {
-			var _this9 = this;
+			var _this10 = this;
 
 			var valueArray = this.getValueArray(this.props.value);
-			var options = this._visibleOptions = this.filterOptions(this.props.multi ? this.getValueArray(this.props.value) : null);
+			var options = this._visibleOptions = this.filterOptions(this.props.multi && this.props.removeSelected ? valueArray : null);
 			var isOpen = this.state.isOpen;
 			if (this.props.multi && !options.length && valueArray.length && !this.state.inputValue) isOpen = false;
 			var focusedOptionIndex = this.getFocusableOptionIndex(valueArray[0]);
@@ -1689,7 +1981,8 @@ var Select$1 = function (_React$Component) {
 				'is-open': isOpen,
 				'is-pseudo-focused': this.state.isPseudoFocused,
 				'is-searchable': this.props.searchable,
-				'has-value': valueArray.length
+				'has-value': valueArray.length,
+				'Select--rtl': this.props.rtl
 			});
 
 			var removeMessage = null;
@@ -1704,7 +1997,7 @@ var Select$1 = function (_React$Component) {
 			return React.createElement(
 				'div',
 				{ ref: function ref(_ref7) {
-						return _this9.wrapper = _ref7;
+						return _this10.wrapper = _ref7;
 					},
 					className: className,
 					style: this.props.wrapperStyle },
@@ -1712,7 +2005,7 @@ var Select$1 = function (_React$Component) {
 				React.createElement(
 					'div',
 					{ ref: function ref(_ref6) {
-							return _this9.control = _ref6;
+							return _this10.control = _ref6;
 						},
 						className: 'Select-control',
 						style: this.props.style,
@@ -1733,7 +2026,22 @@ var Select$1 = function (_React$Component) {
 					this.renderClear(),
 					this.renderArrow()
 				),
-				isOpen ? this.renderOuter(options, !this.props.multi ? valueArray : null, focusedOption) : null
+				isOpen ? React.createElement(
+					'div',
+					null,
+					React.createElement(EventListener, {
+						target: 'window',
+						onScroll: this.handleScroll,
+						onResize: this.handleResize
+					}),
+					React.createElement(RenderToLayer, {
+						ref: 'layer',
+						open: isOpen,
+						componentClickAway: this.componentClickAway,
+						useLayerForClickAway: false,
+						render: this.renderOuter(options, valueArray, focusedOption)
+					})
+				) : null
 			);
 		}
 	}]);
@@ -1743,82 +2051,91 @@ var Select$1 = function (_React$Component) {
 
 
 Select$1.propTypes = {
-	'aria-describedby': PropTypes.string, // HTML ID(s) of element(s) that should be used to describe this input (for assistive tech)
-	'aria-label': PropTypes.string, // Aria label (for assistive tech)
-	'aria-labelledby': PropTypes.string, // HTML ID of an element that should be used as the label (for assistive tech)
-	addLabelText: PropTypes.string, // placeholder displayed when you want to add a label on a multi-value input
-	arrowRenderer: PropTypes.func, // Create drop-down caret element
-	autoBlur: PropTypes.bool, // automatically blur the component when an option is selected
-	autofocus: PropTypes.bool, // autofocus the component on mount
-	autosize: PropTypes.bool, // whether to enable autosizing or not
-	backspaceRemoves: PropTypes.bool, // whether backspace removes an item if there is no text input
-	backspaceToRemoveMessage: PropTypes.string, // Message to use for screenreaders to press backspace to remove the current item - {label} is replaced with the item label
-	className: PropTypes.string, // className for the outer element
+	'aria-describedby': PropTypes$1.string, // HTML ID(s) of element(s) that should be used to describe this input (for assistive tech)
+	'aria-label': PropTypes$1.string, // Aria label (for assistive tech)
+	'aria-labelledby': PropTypes$1.string, // HTML ID of an element that should be used as the label (for assistive tech)
+	arrowRenderer: PropTypes$1.func, // Create drop-down caret element
+	autoBlur: PropTypes$1.bool, // automatically blur the component when an option is selected
+	autoFocus: PropTypes$1.bool, // autofocus the component on mount
+	autofocus: PropTypes$1.bool, // deprecated; use autoFocus instead
+	autosize: PropTypes$1.bool, // whether to enable autosizing or not
+	backspaceRemoves: PropTypes$1.bool, // whether backspace removes an item if there is no text input
+	backspaceToRemoveMessage: PropTypes$1.string, // Message to use for screenreaders to press backspace to remove the current item - {label} is replaced with the item label
+	className: PropTypes$1.string, // className for the outer element
 	clearAllText: stringOrNode, // title for the "clear" control when multi: true
-	clearRenderer: PropTypes.func, // create clearable x element
+	clearRenderer: PropTypes$1.func, // create clearable x element
 	clearValueText: stringOrNode, // title for the "clear" control
-	clearable: PropTypes.bool, // should it be possible to reset value
-	closeOnSelect: PropTypes.bool, // whether to close the menu when a value is selected
-	deleteRemoves: PropTypes.bool, // whether backspace removes an item if there is no text input
-	delimiter: PropTypes.string, // delimiter to use to join multiple values for the hidden field value
-	disabled: PropTypes.bool, // whether the Select is disabled or not
-	escapeClearsValue: PropTypes.bool, // whether escape clears the value when the menu is closed
-	filterOption: PropTypes.func, // method to filter a single option (option, filterString)
-	filterOptions: PropTypes.any, // boolean to enable default filtering or function to filter the options array ([options], filterString, [values])
-	ignoreAccents: PropTypes.bool, // whether to strip diacritics when filtering
-	ignoreCase: PropTypes.bool, // whether to perform case-insensitive filtering
-	inputProps: PropTypes.object, // custom attributes for the Input
-	inputRenderer: PropTypes.func, // returns a custom input component
-	instanceId: PropTypes.string, // set the components instanceId
-	isLoading: PropTypes.bool, // whether the Select is loading externally or not (such as options being loaded)
-	joinValues: PropTypes.bool, // joins multiple values into a single form field with the delimiter (legacy mode)
-	labelKey: PropTypes.string, // path of the label value in option objects
-	matchPos: PropTypes.string, // (any|start) match the start or entire string when filtering
-	matchProp: PropTypes.string, // (any|label|value) which option property to filter on
-	menuBuffer: PropTypes.number, // optional buffer (in px) between the bottom of the viewport and the bottom of the menu
-	menuContainerStyle: PropTypes.object, // optional style to apply to the menu container
-	menuRenderer: PropTypes.func, // renders a custom menu with options
-	menuStyle: PropTypes.object, // optional style to apply to the menu
-	multi: PropTypes.bool, // multi-value input
-	name: PropTypes.string, // generates a hidden <input /> tag with this field name for html forms
+	clearable: PropTypes$1.bool, // should it be possible to reset value
+	closeOnSelect: PropTypes$1.bool, // whether to close the menu when a value is selected
+	deleteRemoves: PropTypes$1.bool, // whether delete removes an item if there is no text input
+	delimiter: PropTypes$1.string, // delimiter to use to join multiple values for the hidden field value
+	disabled: PropTypes$1.bool, // whether the Select is disabled or not
+	escapeClearsValue: PropTypes$1.bool, // whether escape clears the value when the menu is closed
+	filterOption: PropTypes$1.func, // method to filter a single option (option, filterString)
+	filterOptions: PropTypes$1.any, // boolean to enable default filtering or function to filter the options array ([options], filterString, [values])
+	id: PropTypes$1.string, // String to set at the input the a custom id, you can use it for the browser test
+	ignoreAccents: PropTypes$1.bool, // whether to strip diacritics when filtering
+	ignoreCase: PropTypes$1.bool, // whether to perform case-insensitive filtering
+	inputProps: PropTypes$1.object, // custom attributes for the Input
+	inputRenderer: PropTypes$1.func, // returns a custom input component
+	instanceId: PropTypes$1.string, // set the components instanceId
+	isLoading: PropTypes$1.bool, // whether the Select is loading externally or not (such as options being loaded)
+	joinValues: PropTypes$1.bool, // joins multiple values into a single form field with the delimiter (legacy mode)
+	labelKey: PropTypes$1.string, // path of the label value in option objects
+	matchPos: PropTypes$1.string, // (any|start) match the start or entire string when filtering
+	matchProp: PropTypes$1.string, // (any|label|value) which option property to filter on
+	menuBuffer: PropTypes$1.number, // optional buffer (in px) between the bottom of the viewport and the bottom of the menu
+	menuContainerStyle: PropTypes$1.object, // optional style to apply to the menu container
+	menuRenderer: PropTypes$1.func, // renders a custom menu with options
+	menuStyle: PropTypes$1.object, // optional style to apply to the menu
+	multi: PropTypes$1.bool, // multi-value input
+	name: PropTypes$1.string, // generates a hidden <input /> tag with this field name for html forms
 	noResultsText: stringOrNode, // placeholder displayed when there are no matching search results
-	onBlur: PropTypes.func, // onBlur handler: function (event) {}
-	onBlurResetsInput: PropTypes.bool, // whether input is cleared on blur
-	onChange: PropTypes.func, // onChange handler: function (newValue) {}
-	onClose: PropTypes.func, // fires when the menu is closed
-	onCloseResetsInput: PropTypes.bool, // whether input is cleared when menu is closed through the arrow
-	onFocus: PropTypes.func, // onFocus handler: function (event) {}
-	onInputChange: PropTypes.func, // onInputChange handler: function (inputValue) {}
-	onInputKeyDown: PropTypes.func, // input keyDown handler: function (event) {}
-	onMenuScrollToBottom: PropTypes.func, // fires when the menu is scrolled to the bottom; can be used to paginate options
-	onOpen: PropTypes.func, // fires when the menu is opened
-	onSelectResetsInput: PropTypes.bool, // whether input is cleared on select (works only for multiselect)
-	onValueClick: PropTypes.func, // onClick handler for value labels: function (value, event) {}
-	openOnClick: PropTypes.bool, // boolean to control opening the menu when the control is clicked
-	openOnFocus: PropTypes.bool, // always open options menu on focus
-	optionClassName: PropTypes.string, // additional class(es) to apply to the <Option /> elements
-	optionComponent: PropTypes.func, // option component to render in dropdown
-	optionRenderer: PropTypes.func, // optionRenderer: function (option) {}
-	options: PropTypes.array, // array of options
-	pageSize: PropTypes.number, // number of entries to page when using page up/down keys
+	onBlur: PropTypes$1.func, // onBlur handler: function (event) {}
+	onBlurResetsInput: PropTypes$1.bool, // whether input is cleared on blur
+	onChange: PropTypes$1.func, // onChange handler: function (newValue) {}
+	onClose: PropTypes$1.func, // fires when the menu is closed
+	onCloseResetsInput: PropTypes$1.bool, // whether input is cleared when menu is closed through the arrow
+	onFocus: PropTypes$1.func, // onFocus handler: function (event) {}
+	onInputChange: PropTypes$1.func, // onInputChange handler: function (inputValue) {}
+	onInputKeyDown: PropTypes$1.func, // input keyDown handler: function (event) {}
+	onMenuScrollToBottom: PropTypes$1.func, // fires when the menu is scrolled to the bottom; can be used to paginate options
+	onOpen: PropTypes$1.func, // fires when the menu is opened
+	onSelectResetsInput: PropTypes$1.bool, // whether input is cleared on select (works only for multiselect)
+	onValueClick: PropTypes$1.func, // onClick handler for value labels: function (value, event) {}
+	openOnClick: PropTypes$1.bool, // boolean to control opening the menu when the control is clicked
+	openOnFocus: PropTypes$1.bool, // always open options menu on focus
+	optionClassName: PropTypes$1.string, // additional class(es) to apply to the <Option /> elements
+	optionComponent: PropTypes$1.func, // option component to render in dropdown
+	optionRenderer: PropTypes$1.func, // optionRenderer: function (option) {}
+	options: PropTypes$1.array, // array of options
+	pageSize: PropTypes$1.number, // number of entries to page when using page up/down keys
 	placeholder: stringOrNode, // field placeholder, displayed when there's no value
-	required: PropTypes.bool, // applies HTML5 required attribute when needed
-	resetValue: PropTypes.any, // value to use when you clear the control
-	scrollMenuIntoView: PropTypes.bool, // boolean to enable the viewport to shift so that the full menu fully visible when engaged
-	searchable: PropTypes.bool, // whether to enable searching feature or not
-	simpleValue: PropTypes.bool, // pass the value to onChange as a simple value (legacy pre 1.0 mode), defaults to false
-	style: PropTypes.object, // optional style to apply to the control
-	tabIndex: PropTypes.string, // optional tab index of the control
-	tabSelectsValue: PropTypes.bool, // whether to treat tabbing out while focused to be value selection
-	value: PropTypes.any, // initial field value
-	valueComponent: PropTypes.func, // value component to render
-	valueKey: PropTypes.string, // path of the label value in option objects
-	valueRenderer: PropTypes.func, // valueRenderer: function (option) {}
-	wrapperStyle: PropTypes.object // optional style to apply to the component wrapper
+	removeSelected: PropTypes$1.bool, // whether the selected option is removed from the dropdown on multi selects
+	required: PropTypes$1.bool, // applies HTML5 required attribute when needed
+	resetValue: PropTypes$1.any, // value to use when you clear the control
+	rtl: PropTypes$1.bool, // set to true in order to use react-select in right-to-left direction
+	scrollMenuIntoView: PropTypes$1.bool, // boolean to enable the viewport to shift so that the full menu fully visible when engaged
+	searchable: PropTypes$1.bool, // whether to enable searching feature or not
+	simpleValue: PropTypes$1.bool, // pass the value to onChange as a simple value (legacy pre 1.0 mode), defaults to false
+	style: PropTypes$1.object, // optional style to apply to the control
+	tabIndex: PropTypes$1.string, // optional tab index of the control
+	tabSelectsValue: PropTypes$1.bool, // whether to treat tabbing out while focused to be value selection
+	trimFilter: PropTypes$1.bool, // whether to trim whitespace around filter value
+	value: PropTypes$1.any, // initial field value
+	valueComponent: PropTypes$1.func, // value component to render
+	valueKey: PropTypes$1.string, // path of the label value in option objects
+	valueRenderer: PropTypes$1.func, // valueRenderer: function (option) {}
+	wrapperStyle: PropTypes$1.object, // optional style to apply to the component wrapper
+	// New Props
+	anchorOrigin: PropTypes$1.object,
+	targetOrigin: PropTypes$1.object,
+	inputStyle: PropTypes$1.object,
+	arrowStyle: PropTypes$1.object,
+	isOpen: PropTypes$1.bool // open/close menu from outside
 };
 
 Select$1.defaultProps = {
-	addLabelText: 'Add "{label}"?',
 	arrowRenderer: arrowRenderer,
 	autosize: true,
 	backspaceRemoves: true,
@@ -1852,35 +2169,43 @@ Select$1.defaultProps = {
 	optionComponent: Option,
 	pageSize: 5,
 	placeholder: 'Select...',
+	removeSelected: true,
 	required: false,
+	rtl: false,
 	scrollMenuIntoView: true,
 	searchable: true,
 	simpleValue: false,
 	tabSelectsValue: true,
+	trimFilter: true,
 	valueComponent: Value,
-	valueKey: 'value'
+	valueKey: 'value',
+	// New
+	anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+	targetOrigin: { vertical: 'top', horizontal: 'left' },
+	inputStyle: {},
+	arrowStyle: {}
 };
 
 var propTypes = {
-	autoload: PropTypes.bool.isRequired, // automatically call the `loadOptions` prop on-mount; defaults to true
-	cache: PropTypes.any, // object to use to cache results; set to null/false to disable caching
-	children: PropTypes.func.isRequired, // Child function responsible for creating the inner Select component; (props: Object): PropTypes.element
-	ignoreAccents: PropTypes.bool, // strip diacritics when filtering; defaults to true
-	ignoreCase: PropTypes.bool, // perform case-insensitive filtering; defaults to true
-	loadOptions: PropTypes.func.isRequired, // callback to load options asynchronously; (inputValue: string, callback: Function): ?Promise
-	loadingPlaceholder: PropTypes.oneOfType([// replaces the placeholder while options are loading
-	PropTypes.string, PropTypes.node]),
-	multi: PropTypes.bool, // multi-value input
-	noResultsText: PropTypes.oneOfType([// field noResultsText, displayed when no options come back from the server
-	PropTypes.string, PropTypes.node]),
-	onChange: PropTypes.func, // onChange handler: function (newValue) {}
-	onInputChange: PropTypes.func, // optional for keeping track of what is being typed
-	options: PropTypes.array.isRequired, // array of options
-	placeholder: PropTypes.oneOfType([// field placeholder, displayed when there's no value (shared with Select)
-	PropTypes.string, PropTypes.node]),
-	searchPromptText: PropTypes.oneOfType([// label to prompt for search input
-	PropTypes.string, PropTypes.node]),
-	value: PropTypes.any // initial field value
+	autoload: PropTypes$1.bool.isRequired, // automatically call the `loadOptions` prop on-mount; defaults to true
+	cache: PropTypes$1.any, // object to use to cache results; set to null/false to disable caching
+	children: PropTypes$1.func.isRequired, // Child function responsible for creating the inner Select component; (props: Object): PropTypes.element
+	ignoreAccents: PropTypes$1.bool, // strip diacritics when filtering; defaults to true
+	ignoreCase: PropTypes$1.bool, // perform case-insensitive filtering; defaults to true
+	loadOptions: PropTypes$1.func.isRequired, // callback to load options asynchronously; (inputValue: string, callback: Function): ?Promise
+	loadingPlaceholder: PropTypes$1.oneOfType([// replaces the placeholder while options are loading
+	PropTypes$1.string, PropTypes$1.node]),
+	multi: PropTypes$1.bool, // multi-value input
+	noResultsText: PropTypes$1.oneOfType([// field noResultsText, displayed when no options come back from the server
+	PropTypes$1.string, PropTypes$1.node]),
+	onChange: PropTypes$1.func, // onChange handler: function (newValue) {}
+	onInputChange: PropTypes$1.func, // optional for keeping track of what is being typed
+	options: PropTypes$1.array.isRequired, // array of options
+	placeholder: PropTypes$1.oneOfType([// field placeholder, displayed when there's no value (shared with Select)
+	PropTypes$1.string, PropTypes$1.node]),
+	searchPromptText: PropTypes$1.oneOfType([// label to prompt for search input
+	PropTypes$1.string, PropTypes$1.node]),
+	value: PropTypes$1.any // initial field value
 };
 
 var defaultCache = {};
@@ -1950,7 +2275,10 @@ var Async = function (_Component) {
 			var cache = this._cache;
 
 			if (cache && Object.prototype.hasOwnProperty.call(cache, inputValue)) {
+				this._callback = null;
+
 				this.setState({
+					isLoading: false,
 					options: cache[inputValue]
 				});
 
@@ -1958,14 +2286,14 @@ var Async = function (_Component) {
 			}
 
 			var callback = function callback(error, data) {
+				var options = data && data.options || [];
+
+				if (cache) {
+					cache[inputValue] = options;
+				}
+
 				if (callback === _this2._callback) {
 					_this2._callback = null;
-
-					var options = data && data.options || [];
-
-					if (cache) {
-						cache[inputValue] = options;
-					}
 
 					_this2.setState({
 						isLoading: false,
@@ -2211,13 +2539,15 @@ var CreatableSelect = function (_React$Component) {
 		value: function onInputChange(input) {
 			var onInputChange = this.props.onInputChange;
 
+			// This value may be needed in between Select mounts (when this.select is null)
+
+			this.inputValue = input;
 
 			if (onInputChange) {
-				onInputChange(input);
+				this.inputValue = onInputChange(input);
 			}
 
-			// This value may be needed in between Select mounts (when this.select is null)
-			this.inputValue = input;
+			return this.inputValue;
 		}
 	}, {
 		key: 'onInputKeyDown',
@@ -2259,7 +2589,8 @@ var CreatableSelect = function (_React$Component) {
 			var _props4 = this.props,
 			    newOptionCreator = _props4.newOptionCreator,
 			    shouldKeyDownEventCreateNewOption = _props4.shouldKeyDownEventCreateNewOption,
-			    restProps = objectWithoutProperties(_props4, ['newOptionCreator', 'shouldKeyDownEventCreateNewOption']);
+			    refProp = _props4.ref,
+			    restProps = objectWithoutProperties(_props4, ['newOptionCreator', 'shouldKeyDownEventCreateNewOption', 'ref']);
 			var children = this.props.children;
 
 			// We can't use destructuring default values to set the children,
@@ -2267,7 +2598,7 @@ var CreatableSelect = function (_React$Component) {
 			// more reliable in real world use-cases.
 
 			if (!children) {
-				children = defaultChildren$1;
+				children = defaultChildren$2;
 			}
 
 			var props = _extends({}, restProps, {
@@ -2284,6 +2615,9 @@ var CreatableSelect = function (_React$Component) {
 						_this2.labelKey = _ref2.props.labelKey;
 						_this2.valueKey = _ref2.props.valueKey;
 					}
+					if (refProp) {
+						refProp(_ref2);
+					}
 				}
 			});
 
@@ -2295,7 +2629,7 @@ var CreatableSelect = function (_React$Component) {
 
 
 
-function defaultChildren$1(props) {
+function defaultChildren$2(props) {
 	return React.createElement(Select$1, props);
 }
 
@@ -2367,56 +2701,48 @@ CreatableSelect.propTypes = {
 	// Child function responsible for creating the inner Select component
 	// This component can be used to compose HOCs (eg Creatable and Async)
 	// (props: Object): PropTypes.element
-	children: PropTypes.func,
+	children: PropTypes$1.func,
 
 	// See Select.propTypes.filterOptions
-	filterOptions: PropTypes.any,
+	filterOptions: PropTypes$1.any,
 
 	// Searches for any matching option within the set of options.
 	// This function prevents duplicate options from being created.
 	// ({ option: Object, options: Array, labelKey: string, valueKey: string }): boolean
-	isOptionUnique: PropTypes.func,
+	isOptionUnique: PropTypes$1.func,
 
 	// Determines if the current input text represents a valid option.
 	// ({ label: string }): boolean
-	isValidNewOption: PropTypes.func,
+	isValidNewOption: PropTypes$1.func,
 
 	// See Select.propTypes.menuRenderer
-	menuRenderer: PropTypes.any,
+	menuRenderer: PropTypes$1.any,
 
 	// Factory to create new option.
 	// ({ label: string, labelKey: string, valueKey: string }): Object
-	newOptionCreator: PropTypes.func,
+	newOptionCreator: PropTypes$1.func,
 
 	// input change handler: function (inputValue) {}
-	onInputChange: PropTypes.func,
+	onInputChange: PropTypes$1.func,
 
 	// input keyDown handler: function (event) {}
-	onInputKeyDown: PropTypes.func,
+	onInputKeyDown: PropTypes$1.func,
 
 	// new option click handler: function (option) {}
-	onNewOptionClick: PropTypes.func,
+	onNewOptionClick: PropTypes$1.func,
 
 	// See Select.propTypes.options
-	options: PropTypes.array,
+	options: PropTypes$1.array,
 
 	// Creates prompt/placeholder option text.
 	// (filterText: string): string
-	promptTextCreator: PropTypes.func,
+	promptTextCreator: PropTypes$1.func,
+
+	ref: PropTypes$1.func,
 
 	// Decides if a keyDown event (eg its `keyCode`) should result in the creation of a new option.
-	shouldKeyDownEventCreateNewOption: PropTypes.func
+	shouldKeyDownEventCreateNewOption: PropTypes$1.func
 };
-
-function reduce(obj) {
-	var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-	return Object.keys(obj).reduce(function (props, key) {
-		var value = obj[key];
-		if (value !== undefined) props[key] = value;
-		return props;
-	}, props);
-}
 
 var AsyncCreatableSelect = function (_React$Component) {
 	inherits(AsyncCreatableSelect, _React$Component);
@@ -2439,20 +2765,24 @@ var AsyncCreatableSelect = function (_React$Component) {
 			return React.createElement(
 				Async,
 				this.props,
-				function (asyncProps) {
+				function (_ref) {
+					var ref = _ref.ref,
+					    asyncProps = objectWithoutProperties(_ref, ['ref']);
+
+					var asyncRef = ref;
 					return React.createElement(
 						CreatableSelect,
-						_this2.props,
-						function (creatableProps) {
-							return React.createElement(Select$1, _extends({}, reduce(asyncProps, reduce(creatableProps, {})), {
-								onInputChange: function onInputChange(input) {
-									creatableProps.onInputChange(input);
-									return asyncProps.onInputChange(input);
-								},
-								ref: function ref(_ref) {
-									_this2.select = _ref;
-									creatableProps.ref(_ref);
-									asyncProps.ref(_ref);
+						asyncProps,
+						function (_ref2) {
+							var ref = _ref2.ref,
+							    creatableProps = objectWithoutProperties(_ref2, ['ref']);
+
+							var creatableRef = ref;
+							return _this2.props.children(_extends({}, creatableProps, {
+								ref: function ref(select) {
+									creatableRef(select);
+									asyncRef(select);
+									_this2.select = select;
 								}
 							}));
 						}
@@ -2464,10 +2794,25 @@ var AsyncCreatableSelect = function (_React$Component) {
 	return AsyncCreatableSelect;
 }(React.Component);
 
+
+
+function defaultChildren$1(props) {
+	return React.createElement(Select$1, props);
+}
+
+AsyncCreatableSelect.propTypes = {
+	children: PropTypes$1.func.isRequired // Child function responsible for creating the inner Select component; (props: Object): PropTypes.element
+};
+
+AsyncCreatableSelect.defaultProps = {
+	children: defaultChildren$1
+};
+
 Select$1.Async = Async;
 Select$1.AsyncCreatable = AsyncCreatableSelect;
 Select$1.Creatable = CreatableSelect;
 Select$1.Value = Value;
+Select$1.Option = Option;
 
-export { Async, AsyncCreatableSelect as AsyncCreatable, CreatableSelect as Creatable, Value };
+export { Async, AsyncCreatableSelect as AsyncCreatable, CreatableSelect as Creatable, Value, Option };
 export default Select$1;

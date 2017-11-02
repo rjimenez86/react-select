@@ -5,9 +5,10 @@
 */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { findDOMNode } from 'react-dom';
+import ReactDOM from 'react-dom';
 import AutosizeInput from 'react-input-autosize';
 import classNames from 'classnames';
+import EventListener from 'react-event-listener';
 
 import defaultArrowRenderer from './utils/defaultArrowRenderer';
 import defaultFilterOptions from './utils/defaultFilterOptions';
@@ -16,6 +17,9 @@ import defaultClearRenderer from './utils/defaultClearRenderer';
 
 import Option from './Option';
 import Value from './Value';
+import RenderToLayer from './RenderToLayer';
+
+import _ from 'lodash';
 
 const stringifyValue = value =>
 	typeof value === 'string'
@@ -25,10 +29,6 @@ const stringifyValue = value =>
 const stringOrNode = PropTypes.oneOfType([
 	PropTypes.string,
 	PropTypes.node,
-]);
-const stringOrNumber = PropTypes.oneOfType([
-	PropTypes.string,
-	PropTypes.number
 ]);
 
 let instanceId = 1;
@@ -59,6 +59,13 @@ class Select extends React.Component {
 			'onOptionRef',
 			'removeValue',
 			'selectValue',
+			'componentClickAway',
+			'requestClose',
+			'getAnchorPosition',
+			'getOffset',
+			'getTargetPosition',
+			'setPlacement',
+			'autoCloseWhenOffScreen'
 		].forEach((fn) => this[fn] = this[fn].bind(this));
 
 		this.state = {
@@ -79,6 +86,9 @@ class Select extends React.Component {
 				required: this.handleRequired(valueArray[0], this.props.multi),
 			});
 		}
+
+		this.handleResize = _.throttle(this.setPlacement, 100);
+		this.handleScroll = _.throttle(this.setPlacement.bind(this, true), 50);
 	}
 
 	componentDidMount () {
@@ -104,10 +114,13 @@ class Select extends React.Component {
 	}
 
 	componentDidUpdate (prevProps, prevState) {
+
+		this.setPlacement();
+
 		// focus to the selected option
 		if (this.menu && this.focused && this.state.isOpen && !this.hasScrolledToOption) {
-			let focusedOptionNode = findDOMNode(this.focused);
-			let menuNode = findDOMNode(this.menu);
+			let focusedOptionNode = ReactDOM.findDOMNode(this.focused);
+			let menuNode = ReactDOM.findDOMNode(this.menu);
 			menuNode.scrollTop = focusedOptionNode.offsetTop;
 			this.hasScrolledToOption = true;
 		} else if (!this.state.isOpen) {
@@ -116,8 +129,8 @@ class Select extends React.Component {
 
 		if (this._scrollToFocusedOptionOnUpdate && this.focused && this.menu) {
 			this._scrollToFocusedOptionOnUpdate = false;
-			var focusedDOM = findDOMNode(this.focused);
-			var menuDOM = findDOMNode(this.menu);
+			var focusedDOM = ReactDOM.findDOMNode(this.focused);
+			var menuDOM = ReactDOM.findDOMNode(this.menu);
 			var focusedRect = focusedDOM.getBoundingClientRect();
 			var menuRect = menuDOM.getBoundingClientRect();
 			if (focusedRect.bottom > menuRect.bottom) {
@@ -145,6 +158,8 @@ class Select extends React.Component {
 
 	componentWillUnmount () {
 		this.toggleTouchOutsideEvent(false);
+		this.handleResize.cancel();
+		this.handleScroll.cancel();
 	}
 
 	toggleTouchOutsideEvent (enabled) {
@@ -705,6 +720,10 @@ class Select extends React.Component {
 		return this._focusedOption;
 	}
 
+	getInputValue () {
+		return this.state.inputValue;
+	}
+
 	selectFocusedOption () {
 		if (this._focusedOption) {
 			return this.selectValue(this._focusedOption);
@@ -724,7 +743,7 @@ class Select extends React.Component {
 		let renderLabel = this.props.valueRenderer || this.getOptionLabel;
 		let ValueComponent = this.props.valueComponent;
 		if (!valueArray.length) {
-			return !this.state.inputValue ? <div className="Select-placeholder">{this.props.placeholder}</div> : null;
+			return !this.state.inputValue ? <div className="Select-placeholder" style={this.props.inputStyle}>{this.props.placeholder}</div> : null;
 		}
 		let onClick = this.props.onValueClick ? this.handleValueClick : null;
 		if (this.props.multi) {
@@ -738,6 +757,7 @@ class Select extends React.Component {
 						onClick={onClick}
 						onRemove={this.removeValue}
 						value={value}
+						style={this.props.inputStyle}
 					>
 						{renderLabel(value, i)}
 						<span className="Select-aria-only">&nbsp;</span>
@@ -753,6 +773,7 @@ class Select extends React.Component {
 					instancePrefix={this._instancePrefix}
 					onClick={onClick}
 					value={valueArray[0]}
+					style={this.props.inputStyle}
 				>
 					{renderLabel(valueArray[0])}
 				</ValueComponent>
@@ -789,6 +810,7 @@ class Select extends React.Component {
 			ref: ref => this.input = ref,
 			required: this.state.required,
 			value: this.state.inputValue,
+			style: {...this.props.inputStyle}
 		};
 
 		if (this.props.inputRenderer) {
@@ -817,17 +839,18 @@ class Select extends React.Component {
 					onFocus={this.handleInputFocus}
 					ref={ref => this.input = ref}
 					aria-disabled={'' + !!this.props.disabled}
-					style={{ border: 0, width: 1, display:'inline-block' }}/>
+					style={this.props.inputStyle}
+				/>
 			);
 		}
 
 		if (this.props.autosize) {
 			return (
-				<AutosizeInput id={this.props.id} {...inputProps} minWidth="5" />
+				<AutosizeInput id={this.props.id} {...inputProps} minWidth="5" style={{...this.props.inputStyle}} />
 			);
 		}
 		return (
-			<div className={ className } key="input-wrap">
+			<div className={ className } key="input-wrap" style={{...this.props.inputStyle}}>
 				<input id={this.props.id} {...inputProps} />
 			</div>
 		);
@@ -869,6 +892,7 @@ class Select extends React.Component {
 			<span
 				className="Select-arrow-zone"
 				onMouseDown={onMouseDown}
+				style={this.props.arrowStyle}
 			>
 				{arrow}
 			</span>
@@ -1008,6 +1032,102 @@ class Select extends React.Component {
 		);
 	}
 
+	// Request Close when click away
+	componentClickAway (event) {
+		event.preventDefault();
+		this.requestClose('clickAway');
+	}
+
+	requestClose(reason) {
+		if (this.props.onRequestClose) {
+			this.props.onRequestClose(reason);
+		}
+	}
+
+	// Get element (react-select input) position in the DOM
+	getAnchorPosition(el) {
+		if (!el) {
+			el = ReactDOM.findDOMNode(this);
+		}
+
+		const rect = ReactDOM.findDOMNode(this).getBoundingClientRect();
+		const a = {
+			top: rect.top,
+			left: rect.left,
+			width: el.offsetWidth,
+			height: el.offsetHeight,
+		};
+
+		a.bottom = rect.bottom || a.top + a.height;
+		a.middle = a.left + ((a.right - a.left) / 2);
+		a.center = a.top + ((a.bottom - a.top) / 2);
+		a.right = rect.right || a.left + a.width;
+
+		return a;
+	}
+
+	getOffset(obj, offsetProp) {
+		var offset = 0;
+		var currentObj = obj;
+		while (currentObj) {
+			offset += currentObj[offsetProp];
+			currentObj = currentObj.offsetParent;
+		}
+		return offset;
+	}
+
+	// Get target position (dropdown menu)
+	getTargetPosition(targetEl) {
+		return {
+			top: 0,
+			center: targetEl.offsetHeight / 2,
+			bottom: targetEl.offsetHeight,
+			left: 0,
+			middle: targetEl.offsetWidth / 2,
+			right: targetEl.offsetWidth,
+		};
+	}
+
+	// Set dropdown menu fixed position on screen
+	setPlacement (scrolling) {
+
+		let targetEl = null;
+		let options = this._visibleOptions = this.filterOptions(this.props.multi ? this.getValueArray(this.props.value) : null);
+
+		if (!this.state.isOpen && !this.props.isOpen) {
+			return;
+		}
+
+
+		targetEl = this.refs.layer ? this.refs.layer.getLayer().children[0] : null;
+		if (!targetEl) {
+			return;
+		}
+
+		let anchor = this.getAnchorPosition(ReactDOM.findDOMNode(this.wrapper));
+		let target = this.getTargetPosition(targetEl);
+
+		if (scrolling && this.props.autoCloseWhenOffScreen) {
+			this.autoCloseWhenOffScreen(anchor);
+		}
+
+		targetEl.style.top = `${Math.max(0, anchor.bottom)}px`;
+		targetEl.style.left = `${Math.max(0, anchor.left)}px`;
+		targetEl.style.maxHeight = `${window.innerHeight}px`;
+		targetEl.style.position = 'fixed';
+		targetEl.style.width = `${Math.max(0, anchor.width)}px`;
+	}
+
+	// Close dropdown when offscreen
+	autoCloseWhenOffScreen(anchorPosition) {
+		if (anchorPosition.top < 0 ||
+			anchorPosition.top > window.innerHeight ||
+			anchorPosition.left < 0 ||
+			anchorPosition.left > window.innerWidth) {
+			this.requestClose('offScreen');
+		}
+	}
+
 	render () {
 		let valueArray = this.getValueArray(this.props.value);
 		let options = this._visibleOptions = this.filterOptions(this.props.multi && this.props.removeSelected ? valueArray : null);
@@ -1072,7 +1192,22 @@ class Select extends React.Component {
 					{this.renderClear()}
 					{this.renderArrow()}
 				</div>
-				{isOpen ? this.renderOuter(options, valueArray, focusedOption) : null}
+				{isOpen ?
+					<div>
+						<EventListener
+							target="window"
+							onScroll={this.handleScroll}
+							onResize={this.handleResize}
+						/>
+						<RenderToLayer
+							ref="layer"
+							open={isOpen}
+							componentClickAway={this.componentClickAway}
+							useLayerForClickAway={false}
+							render={this.renderOuter(options, valueArray, focusedOption)}
+						/>
+					</div>
+					: null}
 			</div>
 		);
 	}
@@ -1147,7 +1282,7 @@ Select.propTypes = {
 	searchable: PropTypes.bool,           // whether to enable searching feature or not
 	simpleValue: PropTypes.bool,          // pass the value to onChange as a simple value (legacy pre 1.0 mode), defaults to false
 	style: PropTypes.object,              // optional style to apply to the control
-	tabIndex: stringOrNumber,           // optional tab index of the control
+	tabIndex: PropTypes.string,           // optional tab index of the control
 	tabSelectsValue: PropTypes.bool,      // whether to treat tabbing out while focused to be value selection
 	trimFilter: PropTypes.bool,           // whether to trim whitespace around filter value
 	value: PropTypes.any,                 // initial field value
@@ -1155,6 +1290,12 @@ Select.propTypes = {
 	valueKey: PropTypes.string,           // path of the label value in option objects
 	valueRenderer: PropTypes.func,        // valueRenderer: function (option) {}
 	wrapperStyle: PropTypes.object,       // optional style to apply to the component wrapper
+	// New Props
+	anchorOrigin: PropTypes.object,
+	targetOrigin: PropTypes.object,
+	inputStyle: PropTypes.object,
+	arrowStyle: PropTypes.object,
+	isOpen: PropTypes.bool 				// open/close menu from outside
 };
 
 Select.defaultProps = {
@@ -1201,6 +1342,11 @@ Select.defaultProps = {
  	trimFilter: true,
 	valueComponent: Value,
 	valueKey: 'value',
+	// New
+	anchorOrigin: { vertical: 'bottom', horizontal: 'left'},
+	targetOrigin: { vertical: 'top', horizontal: 'left'},
+	inputStyle: {},
+	arrowStyle: {}
 };
 
 export default Select;
