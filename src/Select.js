@@ -156,6 +156,14 @@ class Select extends React.Component {
 		}
 	}
 
+	componentWillUpdate (nextProps, nextState) {
+		if (nextState.isOpen !== this.state.isOpen) {
+			this.toggleTouchOutsideEvent(nextState.isOpen);
+			const handler = nextState.isOpen ? nextProps.onOpen : nextProps.onClose;
+			handler && handler();
+		}
+	}
+
 	componentWillUnmount () {
 		this.toggleTouchOutsideEvent(false);
 		this.handleResize.cancel();
@@ -188,6 +196,12 @@ class Select extends React.Component {
 	focus () {
 		if (!this.input) return;
 		this.input.focus();
+
+		if (this.props.openAfterFocus) {
+			this.setState({
+				isOpen: true,
+			});
+		}
 	}
 
 	blurInput () {
@@ -239,15 +253,20 @@ class Select extends React.Component {
 		event.preventDefault();
 
 		// for the non-searchable select, toggle the menu
-		if (!this.props.searchable) {
+		/*if (!this.props.searchable) {
 			// TODO: This code means that if a select is searchable, onClick the options menu will not appear, only on subsequent click will it open.
 			this.focus();
 			return this.setState({
-				isOpen: !this.state.isOpen,
+				isOpen: true,
 			});
-		}
+		}*/
 
-		if (this.state.isFocused) {
+		this.focus();
+		this.setState({
+			isOpen: true,
+		});
+
+		/*if (this.state.isFocused) {
 			// On iOS, we can get into a state where we think the input is focused but it isn't really,
 			// since iOS ignores programmatic calls to input.focus() that weren't triggered by a click event.
 			// Call focus() again here to be safe.
@@ -271,7 +290,7 @@ class Select extends React.Component {
 			// otherwise, focus the input and open the menu
 			this._openAfterFocus = this.props.openOnClick;
 			this.focus();
-		}
+		}*/
 	}
 
 	handleMouseDownOnArrow (event) {
@@ -323,6 +342,12 @@ class Select extends React.Component {
 	handleInputFocus (event) {
 		if (this.props.disabled) return;
 		var isOpen = this.state.isOpen || this._openAfterFocus || this.props.openOnFocus;
+
+		// Check if isOpen is undefined
+		if (typeof isOpen == 'undefined' && this.state.isOpen === false) {
+			isOpen = true;
+		}
+
 		if (this.props.onFocus) {
 			this.props.onFocus(event);
 		}
@@ -422,7 +447,7 @@ class Select extends React.Component {
 					event.stopPropagation();
 				}
 			break;
-			case 32: // space
+			/*case 32: // space
 				if (!this.props.searchable) {
 					event.preventDefault();
 				}
@@ -432,7 +457,7 @@ class Select extends React.Component {
 				}
 				event.stopPropagation();
 				this.selectFocusedOption();
-			break;
+			break;*/
 			case 38: // up
 				this.focusPreviousOption();
 			break;
@@ -783,7 +808,7 @@ class Select extends React.Component {
 
 	renderInput (valueArray, focusedOptionIndex) {
 		var className = classNames('Select-input', this.props.inputProps.className);
-		const isOpen = !!this.state.isOpen;
+		const isOpen = this.state.isOpen;
 
 		const ariaOwns = classNames({
 			[this._instancePrefix + '-list']: isOpen,
@@ -1116,6 +1141,8 @@ class Select extends React.Component {
 		targetEl.style.maxHeight = `${window.innerHeight}px`;
 		targetEl.style.position = 'fixed';
 		targetEl.style.width = `${Math.max(0, anchor.width)}px`;
+
+		console.log('Set Placement', targetEl);
 	}
 
 	// Close dropdown when offscreen
@@ -1131,7 +1158,7 @@ class Select extends React.Component {
 	render () {
 		let valueArray = this.getValueArray(this.props.value);
 		let options = this._visibleOptions = this.filterOptions(this.props.multi && this.props.removeSelected ? valueArray : null);
-		let isOpen = this.state.isOpen;
+		let isOpen = this.state.isOpen || this.props.isOpen;
 		if (this.props.multi && !options.length && valueArray.length && !this.state.inputValue) isOpen = false;
 		const focusedOptionIndex = this.getFocusableOptionIndex(valueArray[0]);
 
@@ -1168,6 +1195,8 @@ class Select extends React.Component {
 				</span>
 			);
 		}
+
+		console.log('Render de Select.js...', isOpen);
 
 		return (
 			<div ref={ref => this.wrapper = ref}
@@ -1350,3 +1379,4 @@ Select.defaultProps = {
 };
 
 export default Select;
+

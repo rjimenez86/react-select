@@ -1,4 +1,4 @@
-import {Component, PropTypes} from 'react';
+import { Component } from 'react';
 import {unstable_renderSubtreeIntoContainer, unmountComponentAtNode} from 'react-dom';
 
 import Dom from './dom.js';
@@ -50,7 +50,7 @@ class RenderToLayer extends Component {
 		}
 
 		if (this.props.useLayerForClickAway) {
-			this.layer.style.position = 'fixed';
+			this.layer.style.position = 'relative';
 			this.layer.removeEventListener('touchstart', this.onClickAway);
 			this.layer.removeEventListener('click', this.onClickAway);
 		} else {
@@ -77,6 +77,9 @@ class RenderToLayer extends Component {
 
 		if (open) {
 			if (!this.layer) {
+
+				console.log('renderLayer, open true, !this.layer');
+
 				this.layer = document.createElement('div');
 				document.body.appendChild(this.layer);
 
@@ -88,6 +91,7 @@ class RenderToLayer extends Component {
 					this.layer.style.bottom = 0;
 					this.layer.style.left = 0;
 					this.layer.style.right = 0;
+					this.layer.style.zIndex = 10000;
 				} else {
 					setTimeout(() => {
 						window.addEventListener('touchstart', this.onClickAway);
@@ -98,6 +102,7 @@ class RenderToLayer extends Component {
 			const layerElement = render;
 			this.layerElement = unstable_renderSubtreeIntoContainer(this, layerElement, this.layer);
 		} else {
+			console.log('renderLayer, not open');
 			this.unrenderLayer();
 		}
 	}
