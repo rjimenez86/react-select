@@ -1,3 +1,4 @@
+import ReactDOM from 'react-dom';
 import { Component } from 'react';
 import {unstable_renderSubtreeIntoContainer, unmountComponentAtNode} from 'react-dom';
 
@@ -6,12 +7,19 @@ import Dom from './dom.js';
 // heavily inspired by https://github.com/Khan/react-components/blob/master/js/layered-component-mixin.jsx
 class RenderToLayer extends Component {
 
-	componentDidMount() {
-		this.renderLayer();
+
+	componentWillUpdate(nextProps, nextState) {
+		this.renderLayer(nextProps.open, nextProps.render, nextProps.parentComponent);
 	}
 
 	componentDidUpdate() {
-		this.renderLayer();
+		this.renderLayer(this.props.open, this.props.render, this.props.parentComponent);
+	}
+
+	componentWillReceiveProps(nextProps, nextState) {
+		if (nextProps.open !== this.props.open) {
+			this.renderLayer(nextProps.open, nextProps.render, nextProps.parentComponent);
+		}
 	}
 
 	componentWillUnmount() {
@@ -69,40 +77,25 @@ class RenderToLayer extends Component {
 	 * funnels React's hierarchical updates through to a DOM node on an
 	 * entirely different part of the page.
 	 */
-	renderLayer() {
-		const {
-			open,
-			render,
-		} = this.props;
+	renderLayer(open, render, parentComponent) {
 
 		if (open) {
 			if (!this.layer) {
-
-				console.log('renderLayer, open true, !this.layer');
-
 				this.layer = document.createElement('div');
 				document.body.appendChild(this.layer);
 
-				if (this.props.useLayerForClickAway) {
-					this.layer.addEventListener('touchstart', this.onClickAway);
-					this.layer.addEventListener('click', this.onClickAway);
-					this.layer.style.position = 'fixed';
-					this.layer.style.top = 0;
-					this.layer.style.bottom = 0;
-					this.layer.style.left = 0;
-					this.layer.style.right = 0;
-					this.layer.style.zIndex = 10000;
-				} else {
-					setTimeout(() => {
-						window.addEventListener('touchstart', this.onClickAway);
-						window.addEventListener('click', this.onClickAway);
-					}, 0);
-				}
+				let rect = ReactDOM.findDOMNode(parentComponent).getBoundingClientRect();
+
+				this.layer.addEventListener('touchstart', this.onClickAway);
+				this.layer.addEventListener('click', this.onClickAway);
+				this.layer.style.position = 'fixed';
+				this.layer.style.top = `${Math.max(0, rect.bottom)}px`;
+				this.layer.style.left = `${Math.max(0, rect.left)}px`;
+				this.layer.style.width = `${Math.max(0, rect.width)}px`;
 			}
 			const layerElement = render;
 			this.layerElement = unstable_renderSubtreeIntoContainer(this, layerElement, this.layer);
 		} else {
-			console.log('renderLayer, not open');
 			this.unrenderLayer();
 		}
 	}

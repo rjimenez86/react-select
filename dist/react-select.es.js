@@ -635,14 +635,21 @@ var RenderToLayer = function (_Component) {
 	}
 
 	createClass(RenderToLayer, [{
-		key: 'componentDidMount',
-		value: function componentDidMount() {
-			this.renderLayer();
+		key: 'componentWillUpdate',
+		value: function componentWillUpdate(nextProps, nextState) {
+			this.renderLayer(nextProps.open, nextProps.render, nextProps.parentComponent);
 		}
 	}, {
 		key: 'componentDidUpdate',
 		value: function componentDidUpdate() {
-			this.renderLayer();
+			this.renderLayer(this.props.open, this.props.render, this.props.parentComponent);
+		}
+	}, {
+		key: 'componentWillReceiveProps',
+		value: function componentWillReceiveProps(nextProps, nextState) {
+			if (nextProps.open !== this.props.open) {
+				this.renderLayer(nextProps.open, nextProps.render, nextProps.parentComponent);
+			}
 		}
 	}, {
 		key: 'componentWillUnmount',
@@ -706,42 +713,25 @@ var RenderToLayer = function (_Component) {
 
 	}, {
 		key: 'renderLayer',
-		value: function renderLayer() {
-			var _this2 = this;
-
-			var _props = this.props,
-			    open = _props.open,
-			    render = _props.render;
-
+		value: function renderLayer(open, render, parentComponent) {
 
 			if (open) {
 				if (!this.layer) {
-
-					console.log('renderLayer, open true, !this.layer');
-
 					this.layer = document.createElement('div');
 					document.body.appendChild(this.layer);
 
-					if (this.props.useLayerForClickAway) {
-						this.layer.addEventListener('touchstart', this.onClickAway);
-						this.layer.addEventListener('click', this.onClickAway);
-						this.layer.style.position = 'fixed';
-						this.layer.style.top = 0;
-						this.layer.style.bottom = 0;
-						this.layer.style.left = 0;
-						this.layer.style.right = 0;
-						this.layer.style.zIndex = 10000;
-					} else {
-						setTimeout(function () {
-							window.addEventListener('touchstart', _this2.onClickAway);
-							window.addEventListener('click', _this2.onClickAway);
-						}, 0);
-					}
+					var rect = ReactDOM.findDOMNode(parentComponent).getBoundingClientRect();
+
+					this.layer.addEventListener('touchstart', this.onClickAway);
+					this.layer.addEventListener('click', this.onClickAway);
+					this.layer.style.position = 'fixed';
+					this.layer.style.top = Math.max(0, rect.bottom) + 'px';
+					this.layer.style.left = Math.max(0, rect.left) + 'px';
+					this.layer.style.width = Math.max(0, rect.width) + 'px';
 				}
 				var layerElement = render;
 				this.layerElement = unstable_renderSubtreeIntoContainer(this, layerElement, this.layer);
 			} else {
-				console.log('renderLayer, not open');
 				this.unrenderLayer();
 			}
 		}
@@ -807,6 +797,8 @@ var Select$1 = function (_React$Component) {
 	}, {
 		key: 'componentDidMount',
 		value: function componentDidMount() {
+
+			//this.setPlacement();
 			if (typeof this.props.autofocus !== 'undefined' && typeof console !== 'undefined') {
 				console.warn('Warning: The autofocus prop will be deprecated in react-select1.0.0 in favor of autoFocus to match React\'s autoFocus prop');
 			}
@@ -831,9 +823,6 @@ var Select$1 = function (_React$Component) {
 	}, {
 		key: 'componentDidUpdate',
 		value: function componentDidUpdate(prevProps, prevState) {
-
-			this.setPlacement();
-
 			// focus to the selected option
 			if (this.menu && this.focused && this.state.isOpen && !this.hasScrolledToOption) {
 				var focusedOptionNode = ReactDOM.findDOMNode(this.focused);
@@ -981,41 +970,39 @@ var Select$1 = function (_React$Component) {
 			event.preventDefault();
 
 			// for the non-searchable select, toggle the menu
-			/*if (!this.props.searchable) {
-   	// TODO: This code means that if a select is searchable, onClick the options menu will not appear, only on subsequent click will it open.
-   	this.focus();
-   	return this.setState({
-   		isOpen: true,
-   	});
-   }*/
+			if (!this.props.searchable) {
+				// TODO: This code means that if a select is searchable, onClick the options menu will not appear, only on subsequent click will it open.
+				this.focus();
+				return this.setState({
+					isOpen: true
+				});
+			}
 
-			this.focus();
-			this.setState({
-				isOpen: true
-			});
+			if (this.state.isFocused) {
+				// On iOS, we can get into a state where we think the input is focused but it isn't really,
+				// since iOS ignores programmatic calls to input.focus() that weren't triggered by a click event.
+				// Call focus() again here to be safe.
+				this.focus();
 
-			/*if (this.state.isFocused) {
-   	// On iOS, we can get into a state where we think the input is focused but it isn't really,
-   	// since iOS ignores programmatic calls to input.focus() that weren't triggered by a click event.
-   	// Call focus() again here to be safe.
-   	this.focus();
-   		let input = this.input;
-   	if (typeof input.getInput === 'function') {
-   		// Get the actual DOM input if the ref is an <AutosizeInput /> component
-   		input = input.getInput();
-   	}
-   		// clears the value so that the cursor will be at the end of input when the component re-renders
-   	input.value = '';
-   		// if the input is focused, ensure the menu is open
-   	this.setState({
-   		isOpen: true,
-   		isPseudoFocused: false,
-   	});
-   } else {
-   	// otherwise, focus the input and open the menu
-   	this._openAfterFocus = this.props.openOnClick;
-   	this.focus();
-   }*/
+				var input = this.input;
+				if (typeof input.getInput === 'function') {
+					// Get the actual DOM input if the ref is an <AutosizeInput /> component
+					input = input.getInput();
+				}
+
+				// clears the value so that the cursor will be at the end of input when the component re-renders
+				input.value = '';
+
+				// if the input is focused, ensure the menu is open
+				this.setState({
+					isOpen: true,
+					isPseudoFocused: false
+				});
+			} else {
+				// otherwise, focus the input and open the menu
+				this._openAfterFocus = this.props.openOnClick;
+				this.focus();
+			}
 		}
 	}, {
 		key: 'handleMouseDownOnArrow',
@@ -1953,7 +1940,7 @@ var Select$1 = function (_React$Component) {
 				return;
 			}
 
-			targetEl = this.refs.layer ? this.refs.layer.getLayer().children[0] : null;
+			targetEl = this.refs.layer && this.refs.layer.getLayer() ? this.refs.layer.getLayer().children[0] : null;
 			if (!targetEl) {
 				return;
 			}
@@ -1970,8 +1957,6 @@ var Select$1 = function (_React$Component) {
 			targetEl.style.maxHeight = window.innerHeight + 'px';
 			targetEl.style.position = 'fixed';
 			targetEl.style.width = Math.max(0, anchor.width) + 'px';
-
-			console.log('Set Placement', targetEl);
 		}
 
 		// Close dropdown when offscreen
@@ -2023,8 +2008,6 @@ var Select$1 = function (_React$Component) {
 				);
 			}
 
-			console.log('Render de Select.js...', isOpen);
-
 			return React.createElement(
 				'div',
 				{ ref: function ref(_ref7) {
@@ -2057,7 +2040,7 @@ var Select$1 = function (_React$Component) {
 					this.renderClear(),
 					this.renderArrow()
 				),
-				isOpen ? React.createElement(
+				React.createElement(
 					'div',
 					null,
 					React.createElement(EventListener, {
@@ -2070,9 +2053,10 @@ var Select$1 = function (_React$Component) {
 						open: isOpen,
 						componentClickAway: this.componentClickAway,
 						useLayerForClickAway: false,
+						parentComponent: this.wrapper,
 						render: this.renderOuter(options, valueArray, focusedOption)
 					})
-				) : null
+				)
 			);
 		}
 	}]);

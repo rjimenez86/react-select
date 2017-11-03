@@ -92,6 +92,8 @@ class Select extends React.Component {
 	}
 
 	componentDidMount () {
+
+		//this.setPlacement();
 		if (typeof this.props.autofocus !== 'undefined' && typeof console !== 'undefined') {
 			console.warn('Warning: The autofocus prop will be deprecated in react-select1.0.0 in favor of autoFocus to match React\'s autoFocus prop');
 		}
@@ -114,9 +116,6 @@ class Select extends React.Component {
 	}
 
 	componentDidUpdate (prevProps, prevState) {
-
-		this.setPlacement();
-
 		// focus to the selected option
 		if (this.menu && this.focused && this.state.isOpen && !this.hasScrolledToOption) {
 			let focusedOptionNode = ReactDOM.findDOMNode(this.focused);
@@ -253,20 +252,15 @@ class Select extends React.Component {
 		event.preventDefault();
 
 		// for the non-searchable select, toggle the menu
-		/*if (!this.props.searchable) {
+		if (!this.props.searchable) {
 			// TODO: This code means that if a select is searchable, onClick the options menu will not appear, only on subsequent click will it open.
 			this.focus();
 			return this.setState({
 				isOpen: true,
 			});
-		}*/
+		}
 
-		this.focus();
-		this.setState({
-			isOpen: true,
-		});
-
-		/*if (this.state.isFocused) {
+		if (this.state.isFocused) {
 			// On iOS, we can get into a state where we think the input is focused but it isn't really,
 			// since iOS ignores programmatic calls to input.focus() that weren't triggered by a click event.
 			// Call focus() again here to be safe.
@@ -290,7 +284,7 @@ class Select extends React.Component {
 			// otherwise, focus the input and open the menu
 			this._openAfterFocus = this.props.openOnClick;
 			this.focus();
-		}*/
+		}
 	}
 
 	handleMouseDownOnArrow (event) {
@@ -1123,8 +1117,7 @@ class Select extends React.Component {
 			return;
 		}
 
-
-		targetEl = this.refs.layer ? this.refs.layer.getLayer().children[0] : null;
+		targetEl = this.refs.layer && this.refs.layer.getLayer() ? this.refs.layer.getLayer().children[0] : null;
 		if (!targetEl) {
 			return;
 		}
@@ -1141,8 +1134,6 @@ class Select extends React.Component {
 		targetEl.style.maxHeight = `${window.innerHeight}px`;
 		targetEl.style.position = 'fixed';
 		targetEl.style.width = `${Math.max(0, anchor.width)}px`;
-
-		console.log('Set Placement', targetEl);
 	}
 
 	// Close dropdown when offscreen
@@ -1196,8 +1187,6 @@ class Select extends React.Component {
 			);
 		}
 
-		console.log('Render de Select.js...', isOpen);
-
 		return (
 			<div ref={ref => this.wrapper = ref}
 				 className={className}
@@ -1221,22 +1210,21 @@ class Select extends React.Component {
 					{this.renderClear()}
 					{this.renderArrow()}
 				</div>
-				{isOpen ?
-					<div>
-						<EventListener
-							target="window"
-							onScroll={this.handleScroll}
-							onResize={this.handleResize}
-						/>
-						<RenderToLayer
-							ref="layer"
-							open={isOpen}
-							componentClickAway={this.componentClickAway}
-							useLayerForClickAway={false}
-							render={this.renderOuter(options, valueArray, focusedOption)}
-						/>
-					</div>
-					: null}
+				<div>
+					<EventListener
+						target="window"
+						onScroll={this.handleScroll}
+						onResize={this.handleResize}
+					/>
+					<RenderToLayer
+						ref="layer"
+						open={isOpen}
+						componentClickAway={this.componentClickAway}
+						useLayerForClickAway={false}
+						parentComponent={this.wrapper}
+						render={this.renderOuter(options, valueArray, focusedOption)}
+					/>
+				</div>
 			</div>
 		);
 	}
