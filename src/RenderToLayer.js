@@ -92,6 +92,7 @@ class RenderToLayer extends Component {
 				this.layer.style.top = `${Math.max(0, rect.bottom)}px`;
 				this.layer.style.left = `${Math.max(0, rect.left)}px`;
 				this.layer.style.width = `${Math.max(0, rect.width)}px`;
+				this.layer.style.zIndex = 10000;
 			}
 			const layerElement = render;
 			this.layerElement = unstable_renderSubtreeIntoContainer(this, layerElement, this.layer);
