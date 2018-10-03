@@ -260,26 +260,7 @@ class Select extends React.Component {
 			});
 		}
 
-		// Call focus() again here to be safe.
-		this.focus();
-
-		let input = this.input;
-		if (typeof input.getInput === 'function') {
-			// Get the actual DOM input if the ref is an <AutosizeInput /> component
-			input = input.getInput();
-		}
-
-		// clears the value so that the cursor will be at the end of input when the component re-renders
-		input.value = '';
-
-		// if the input is focused, ensure the menu is open
-		this.setState({
-			isOpen: true,
-			isPseudoFocused: false,
-		});
-
-		// Not working in a second modal
-		/*if (this.state.isFocused) {
+		if (this.state.isFocused) {
 			// On iOS, we can get into a state where we think the input is focused but it isn't really,
 			// since iOS ignores programmatic calls to input.focus() that weren't triggered by a click event.
 			// Call focus() again here to be safe.
@@ -303,7 +284,7 @@ class Select extends React.Component {
 			// otherwise, focus the input and open the menu
 			this._openAfterFocus = this.props.openOnClick;
 			this.focus();
-		}*/
+		}
 	}
 
 	handleMouseDownOnArrow (event) {
